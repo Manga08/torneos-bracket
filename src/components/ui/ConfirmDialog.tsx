@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
+import { AppButton } from './AppButton';
 
 interface ConfirmDialogProps {
   isOpen: boolean;
@@ -22,6 +23,8 @@ export const ConfirmDialog = ({
   cancelText = 'Cancelar',
   isDestructive = false,
 }: ConfirmDialogProps) => {
+  const isValorant = document.body.classList.contains('theme-valorant');
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -32,16 +35,17 @@ export const ConfirmDialog = ({
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={onClose}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100]"
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm"
+            style={{ zIndex: 100 }}
           />
           
           {/* Dialog */}
-          <div className="fixed inset-0 flex items-center justify-center z-[101] pointer-events-none">
+          <div className="fixed inset-0 flex items-center justify-center pointer-events-none" style={{ zIndex: 101 }}>
             <motion.div
               initial={{ opacity: 0, scale: 0.95, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
-              className="bg-surface border border-white/10 rounded-xl shadow-2xl w-full max-w-md p-6 pointer-events-auto m-4"
+              className="modal-content w-full max-w-md p-6 pointer-events-auto m-4"
             >
               <div className="flex justify-between items-start mb-4">
                 <div className="flex items-center gap-3">
@@ -60,25 +64,25 @@ export const ConfirmDialog = ({
               </p>
               
               <div className="flex justify-end gap-3">
-                <button
+                <AppButton
                   onClick={onClose}
-                  className="px-4 py-2 text-sm font-medium text-text-muted hover:text-white transition-colors"
+                  variant="ghost"
+                  size="sm"
+                  theme={isValorant ? 'valorant' : undefined}
                 >
                   {cancelText}
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                   onClick={() => {
                     onConfirm();
                     onClose();
                   }}
-                  className={`px-4 py-2 text-sm font-medium rounded-lg transition-colors ${
-                    isDestructive 
-                      ? 'bg-red-500 hover:bg-red-600 text-white' 
-                      : 'bg-primary hover:bg-primary-hover text-white'
-                  }`}
+                  variant={isDestructive ? 'danger' : 'primary'}
+                  size="sm"
+                  theme={isValorant ? 'valorant' : undefined}
                 >
                   {confirmText}
-                </button>
+                </AppButton>
               </div>
             </motion.div>
           </div>

@@ -1,15 +1,16 @@
 import { Link, useLocation } from 'react-router-dom';
-import { useAuthStore } from '../../store/authStore';
-import { LogOut, User, LayoutDashboard } from 'lucide-react';
+import { useAuth } from '../../features/auth/hooks/useAuth';
+import { LogOut, User, Trophy } from 'lucide-react';
 
 export const Navbar = () => {
-  const { user, signOut } = useAuthStore();
+  const { user, signOut, isSuperAdmin } = useAuth();
   const location = useLocation();
 
-  const isAdmin = location.pathname.startsWith('/admin');
+  const isDashboardActive = location.pathname === '/admin/dashboard';
+  const isUsersActive = location.pathname === '/admin/users';
 
   return (
-    <nav className="border-b border-border bg-surface/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300 relative">
+    <nav className="border-b border-border bg-surface/80 backdrop-blur-md sticky top-0 z-50 transition-colors duration-300">
       <div className="navbar-stripe hidden"></div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
@@ -18,7 +19,7 @@ export const Navbar = () => {
               <div className="w-8 h-8 bg-linear-to-br from-primary to-purple-600 rounded-lg flex items-center justify-center shadow-lg shadow-primary/20 group-hover:shadow-primary/40 transition-all">
                 <span className="text-white font-bold text-lg">T</span>
               </div>
-              <span className="text-white font-display font-bold text-xl tracking-tight group-hover:text-primary transition-colors">
+              <span className="text-white font-bold text-xl tracking-tight group-hover:text-primary transition-colors app-title">
                 Tournament Maker
               </span>
             </Link>
@@ -29,13 +30,26 @@ export const Navbar = () => {
                   <Link
                     to="/admin/dashboard"
                     className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                      isAdmin 
+                      isDashboardActive 
                         ? 'bg-surface-highlight text-white border border-border' 
                         : 'text-text-muted hover:text-white hover:bg-surface-highlight'
                     }`}
                   >
-                    <LayoutDashboard size={16} />
-                    Dashboard
+                    <Trophy size={16} />
+                    Torneos
+                  </Link>
+                )}
+                {user && isSuperAdmin && (
+                  <Link
+                    to="/admin/users"
+                    className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                      isUsersActive
+                        ? 'bg-surface-highlight text-white border border-border'
+                        : 'text-text-muted hover:text-white hover:bg-surface-highlight'
+                    }`}
+                  >
+                    <User size={16} />
+                    Usuarios
                   </Link>
                 )}
               </div>
@@ -49,6 +63,14 @@ export const Navbar = () => {
                   <User size={14} />
                   <span className="hidden sm:block">{user.email}</span>
                 </div>
+                
+                <Link
+                  to="/account"
+                  className="text-text-muted hover:text-white transition-colors text-sm font-medium"
+                >
+                  Mi cuenta
+                </Link>
+
                 <button
                   onClick={() => signOut()}
                   className="text-text-muted hover:text-white transition-colors p-2 hover:bg-surface-highlight rounded-lg"

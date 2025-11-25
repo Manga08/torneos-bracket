@@ -1,8 +1,9 @@
+/* Import Fonts for Themes */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&family=Teko:wght@400;500;600;700&display=swap');
+
 @import "tailwindcss";
 
-/* Import Fonts for Themes */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Rajdhani:wght@400;500;600;700&family=Teko:wght@400;500;600;700&display=swap');
-
+/* stylelint-disable-next-line at-rule-no-unknown */
 @theme {
   /* BASE THEME TOKENS (Default) */
   --color-background: #0f1016; 
@@ -75,6 +76,37 @@ body {
 }
 
 /* =========================================
+   THEME: DEFAULT
+   ========================================= */
+.theme-default {
+  --color-background: #0f1016; 
+  --color-surface: #1a1b26; 
+  --color-surface-highlight: #24283b; 
+  --color-surface-dark: #111827; 
+  
+  --color-primary: #6366f1; 
+  --color-primary-hover: #4f46e5; 
+  
+  --color-text-main: #fafafa; 
+  --color-text-muted: #a1a1aa; 
+
+  --color-success: #22c55e;
+  --color-warning: #eab308;
+  --color-danger: #ef4444;
+  --color-info: #3b82f6;
+
+  --color-border: rgba(255, 255, 255, 0.1);
+  --color-background-glow: #1e1b4b;
+  
+  --bracket-connector-color: #6366f1;
+  --bracket-connector-width: 2px;
+  --bracket-connector-opacity: 0.5;
+
+  --font-display: "Inter", system-ui, sans-serif;
+  --font-body: "Inter", system-ui, sans-serif;
+}
+
+/* =========================================
    THEME: VALORANT
    ========================================= */
 .theme-valorant {
@@ -97,7 +129,7 @@ body {
   --bracket-connector-opacity: 0.6;
 
   --font-display: "Teko", sans-serif;
-  --font-body: "Rajdhani", sans-serif;
+  --font-body: "Barlow", sans-serif;
 
   /* Valorant Specific Legibility Vars */
   --valorant-scrim-gradient: transparent; /* Removed heavy scrim */
@@ -108,6 +140,14 @@ body {
   
   --valorant-btn-primary-bg: linear-gradient(135deg, #FF4655 0%, #BD3944 100%);
   --valorant-btn-secondary-bg: rgba(15, 25, 35, 0.8);
+
+  /* Apply font globally for this theme */
+  font-family: var(--font-body);
+}
+
+/* App Title Override */
+.app-title {
+  font-family: "Inter", system-ui, sans-serif !important;
 }
 
 /* Valorant Utility Classes */
@@ -248,9 +288,14 @@ body {
 
 /* Valorant Specific UI Overrides */
 .theme-valorant .glass-card {
-  @apply bg-surface/90 backdrop-blur-md border border-white/10 rounded-none;
-  /* Removed clip-path from glass-card to avoid heavy look on main containers if not desired, 
-     or keep it only for specific cards. Keeping it simple for now. */
+  @apply bg-black/60 border border-white/10 rounded-none backdrop-blur-md;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Fix for Valorant theme hover state to prevent unwanted background change */
+.theme-valorant .glass-card:hover {
+  @apply bg-black/60 border-white/10;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
 }
 
 /* Bracket Node - Reverted to cleaner style */
@@ -456,6 +501,17 @@ body {
   @apply bg-surface/80 backdrop-blur-xl border border-white/5 rounded-xl p-6 transition-all duration-300;
 }
 
+.theme-valorant .glass-card {
+  @apply bg-black/60 border border-white/10 rounded-none backdrop-blur-md;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+/* Fix for Valorant theme hover state to prevent unwanted background change */
+.theme-valorant .glass-card:hover {
+  @apply bg-black/60 border-white/10;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
 .glass-card:hover {
   @apply border-white/10 bg-surface/90 shadow-lg shadow-primary/5;
 }
@@ -511,3 +567,98 @@ body {
   background-color: #4b5563;
 }
 
+/* =========================================
+   MODAL STYLES
+   ========================================= */
+
+/* Default */
+.modal-content {
+  @apply bg-surface border border-border rounded-xl shadow-2xl;
+}
+
+.modal-header {
+  @apply bg-surface-highlight;
+}
+
+.input-score {
+  @apply bg-surface-dark border border-border rounded-lg focus:border-primary focus:ring-1 focus:ring-primary;
+}
+
+/* Valorant Theme */
+.theme-valorant .modal-content {
+  @apply bg-black/90 border border-white/10 rounded-none shadow-2xl backdrop-blur-md;
+  box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+}
+
+.theme-valorant .modal-header {
+  @apply bg-white/5 border-b border-white/10;
+}
+
+.theme-valorant .input-score {
+  @apply bg-black/50 border border-white/10 rounded-none text-white font-display;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+}
+
+.theme-valorant .input-score:focus {
+  @apply border-primary ring-0;
+  box-shadow: inset 0 2px 10px rgba(0,0,0,0.5), 0 0 15px rgba(255, 70, 85, 0.2);
+}
+
+/* =========================================
+   BRACKET VIEW STYLES
+   ========================================= */
+
+/* Default */
+/* Removed semantic classes for BracketView as requested to revert to original design */
+
+/* Valorant Theme */
+/* Removed semantic classes for BracketView as requested to revert to original design */
+
+
+/* =========================================
+   STANDINGS TABLE STYLES
+   ========================================= */
+
+/* Default */
+.standings-header {
+  @apply bg-white/5 border-b border-white/10;
+}
+
+.standings-th-first {
+  @apply rounded-tl-lg;
+}
+
+.standings-th-last {
+  @apply rounded-tr-lg;
+}
+
+.standings-row {
+  @apply border-b border-white/5 hover:bg-white/5;
+}
+
+.text-success {
+  @apply text-green-400;
+}
+
+.text-danger {
+  @apply text-red-400;
+}
+
+/* Valorant Theme */
+.theme-valorant .standings-header {
+  @apply bg-white/10 border-b border-white/20;
+}
+
+.theme-valorant .standings-th-first,
+.theme-valorant .standings-th-last {
+  @apply rounded-none;
+}
+
+.theme-valorant .standings-row {
+  @apply border-b border-white/10 hover:bg-white/10;
+}
+
+.theme-valorant .standings-row:hover {
+  transform: translateX(4px);
+  box-shadow: -4px 0 0 var(--color-primary);
+}

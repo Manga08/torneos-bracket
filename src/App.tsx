@@ -1,16 +1,19 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Layout } from './components/layout/Layout';
-import { LoginPage } from './pages/LoginPage';
-import { Dashboard } from './pages/admin/Dashboard';
-import { CreateTournament } from './pages/admin/CreateTournament';
-import { TournamentDetail } from './pages/admin/TournamentDetail';
-import { PublicTournamentView } from './pages/public/PublicTournamentView';
-import { useAuthStore } from './store/authStore';
+import { LoginPage } from './features/auth/pages/LoginPage/LoginPage';
+import { RegisterPage } from './features/auth/pages/Register/RegisterPage';
+import { AccountPage } from './features/auth/pages/Account/AccountPage';
+import { UserManagement } from './features/auth/pages/UserManagement/UserManagement';
+import { Dashboard } from './features/tournaments/pages/Dashboard/Dashboard';
+import { CreateTournament } from './features/tournaments/pages/CreateTournament/CreateTournament';
+import { TournamentDetail } from './features/tournaments/pages/AdminTournamentDetail/TournamentDetail';
+import { PublicTournamentView } from './features/tournaments/pages/PublicTournamentView/PublicTournamentView';
+import { useAuth } from './features/auth/hooks/useAuth';
 
 // Componente para proteger rutas
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
-  const { user, loading } = useAuthStore();
+  const { user, loading } = useAuth();
 
   if (loading) return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
   
@@ -22,7 +25,7 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
 };
 
 function App() {
-  const { checkSession } = useAuthStore();
+  const { checkSession } = useAuth();
 
   useEffect(() => {
     checkSession();
@@ -52,7 +55,14 @@ function App() {
             </div>
           } />
           <Route path="login" element={<LoginPage />} />
+          <Route path="register" element={<RegisterPage />} />
           
+          <Route path="account" element={
+            <ProtectedRoute>
+              <AccountPage />
+            </ProtectedRoute>
+          } />
+
           {/* Rutas Admin */}
           <Route path="admin">
             <Route path="dashboard" element={
@@ -68,6 +78,11 @@ function App() {
             <Route path="torneos/:id" element={
               <ProtectedRoute>
                 <TournamentDetail />
+              </ProtectedRoute>
+            } />
+            <Route path="users" element={
+              <ProtectedRoute>
+                <UserManagement />
               </ProtectedRoute>
             } />
             {/* Más rutas admin aquí */}
