@@ -1,5 +1,4 @@
-
-import type { Match, Participant } from '../../../types/database';
+import type { Match, Participant } from '@/types/database';
 
 export interface Standing {
   participantId: string;
@@ -17,7 +16,7 @@ export const calculateStandings = (participants: Participant[], matches: Match[]
   const stats: Record<string, Standing> = {};
 
   // Initialize
-  participants.forEach(p => {
+  participants.forEach((p) => {
     stats[p.id] = {
       participantId: p.id,
       name: p.name,
@@ -27,12 +26,12 @@ export const calculateStandings = (participants: Participant[], matches: Match[]
       draw: 0,
       points: 0,
       roundDiff: 0,
-      buchholz: 0
+      buchholz: 0,
     };
   });
 
   // Calculate basic stats
-  matches.forEach(match => {
+  matches.forEach((match) => {
     if (match.status !== 'completed') return;
     if (!match.participant_a_id || !match.participant_b_id) return;
 
@@ -47,8 +46,8 @@ export const calculateStandings = (participants: Participant[], matches: Match[]
     const scoreA = match.score_a ?? 0;
     const scoreB = match.score_b ?? 0;
 
-    pA.roundDiff += (scoreA - scoreB);
-    pB.roundDiff += (scoreB - scoreA);
+    pA.roundDiff += scoreA - scoreB;
+    pB.roundDiff += scoreB - scoreA;
 
     if (scoreA > scoreB) {
       pA.won++;
@@ -68,7 +67,7 @@ export const calculateStandings = (participants: Participant[], matches: Match[]
 
   // Calculate Buchholz (Sum of opponents' points) - Only relevant for Swiss usually, but harmless here
   // We need a second pass
-  matches.forEach(match => {
+  matches.forEach((match) => {
     if (match.status !== 'completed') return;
     if (!match.participant_a_id || !match.participant_b_id) return;
 
@@ -94,8 +93,8 @@ export const calculateStandings = (participants: Participant[], matches: Match[]
 export const pairSwissRound = (
   participants: Participant[],
   allMatches: Match[],
-  roundNumber: number
-): { matchId: string, participantA: string, participantB: string }[] => {
+  roundNumber: number,
+): { matchId: string; participantA: string; participantB: string }[] => {
   // 1. Get standings based on all previous matches
   const standings = calculateStandings(participants, allMatches);
 
@@ -107,18 +106,19 @@ export const pairSwissRound = (
   // - Pair 1 vs 2, 3 vs 4...
   // - Check if they already played. If yes, swap with next.
 
-  const pairings: { matchId: string, participantA: string, participantB: string }[] = [];
+  const pairings: { matchId: string; participantA: string; participantB: string }[] = [];
 
   // Helper to check if they played
   const hasPlayed = (p1Id: string, p2Id: string) => {
-    return allMatches.some(m =>
-      (m.participant_a_id === p1Id && m.participant_b_id === p2Id) ||
-      (m.participant_a_id === p2Id && m.participant_b_id === p1Id)
+    return allMatches.some(
+      (m) =>
+        (m.participant_a_id === p1Id && m.participant_b_id === p2Id) ||
+        (m.participant_a_id === p2Id && m.participant_b_id === p1Id),
     );
   };
 
   // We need to find the matches for this round to get their IDs
-  const roundMatches = allMatches.filter(m => m.round_number === roundNumber);
+  const roundMatches = allMatches.filter((m) => m.round_number === roundNumber);
   if (roundMatches.length === 0) return [];
 
   let matchIndex = 0;
@@ -156,7 +156,7 @@ export const pairSwissRound = (
     pairings.push({
       matchId: roundMatches[matchIndex].id,
       participantA: p1.participantId,
-      participantB: p2.participantId
+      participantB: p2.participantId,
     });
 
     matchIndex++;

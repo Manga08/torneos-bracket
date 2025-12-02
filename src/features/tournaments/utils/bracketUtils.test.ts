@@ -1,6 +1,8 @@
 import { describe, it, expect } from 'vitest';
+
+import type { Participant } from '@/types/database';
+
 import { generateSingleEliminationMatches } from './bracketUtils';
-import type { Participant } from '../../../types/database';
 
 describe('bracketUtils', () => {
   const createParticipants = (count: number): Participant[] => {
@@ -9,7 +11,7 @@ describe('bracketUtils', () => {
       name: `Participant ${i + 1}`,
       tournament_id: 'test-tournament',
       created_at: new Date().toISOString(),
-      seed: i + 1
+      seed: i + 1,
     }));
   };
 
@@ -22,7 +24,7 @@ describe('bracketUtils', () => {
       expect(matches).toHaveLength(7);
 
       // Round 1 (Quarterfinals) should have 4 matches
-      const round1 = matches.filter(m => m.round_number === 1);
+      const round1 = matches.filter((m) => m.round_number === 1);
       expect(round1).toHaveLength(4);
 
       // Check seeds for Round 1
@@ -38,7 +40,7 @@ describe('bracketUtils', () => {
       // This is NOT standard seeding (1vs8, 2vs7), but it IS the current logic.
       // I must test the CURRENT logic as per instructions "No cambies la lógica de negocio".
 
-      const match1 = round1.find(m => m.match_number === 1);
+      const match1 = round1.find((m) => m.match_number === 1);
       expect(match1?.participant_a_id).toBe('p-1');
       expect(match1?.participant_b_id).toBe('p-2');
     });
@@ -52,7 +54,7 @@ describe('bracketUtils', () => {
       // Matches generated: 4 (R1) + 2 (R2) + 1 (R3) = 7 matches structure.
       expect(matches).toHaveLength(7);
 
-      const round1 = matches.filter(m => m.round_number === 1);
+      const round1 = matches.filter((m) => m.round_number === 1);
       expect(round1).toHaveLength(4);
 
       // With 6 participants:
@@ -75,11 +77,11 @@ describe('bracketUtils', () => {
       // But current logic fills sequentially.
       // So M4 is empty.
 
-      const match3 = round1.find(m => m.match_number === 3);
+      const match3 = round1.find((m) => m.match_number === 3);
       expect(match3?.participant_a_id).toBe('p-5');
       expect(match3?.participant_b_id).toBe('p-6');
 
-      const match4 = round1.find(m => m.match_number === 4);
+      const match4 = round1.find((m) => m.match_number === 4);
       expect(match4?.participant_a_id).toBeNull();
       expect(match4?.participant_b_id).toBeNull();
     });
@@ -92,7 +94,7 @@ describe('bracketUtils', () => {
       // + 1 Third Place match = 4 matches total.
       expect(matches).toHaveLength(4);
 
-      const thirdPlaceMatch = matches.find(m => m.stage === 'bronze');
+      const thirdPlaceMatch = matches.find((m) => m.stage === 'bronze');
       expect(thirdPlaceMatch).toBeDefined();
       expect(thirdPlaceMatch?.round_number).toBe(2); // Same level as final
     });

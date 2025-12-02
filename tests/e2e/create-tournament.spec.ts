@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('create tournament flow', async ({ page }) => {
+test('create tournament flow', async ({ page: _page }) => {
   // TODO: Implement create tournament E2E test
   // 1. Login
   // 2. Go to dashboard

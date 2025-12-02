@@ -1,14 +1,16 @@
+import { motion } from 'framer-motion';
+import { ArrowLeft, Trophy, Users, Gamepad2, Settings, Palette } from 'lucide-react';
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { createTournament, assignTournamentPermissions } from '../../api/tournamentsApi';
-import { useAuthStore } from '../../../../store/authStore';
-import { AppButton } from '../../../../components/ui/AppButton';
-import { ArrowLeft, Trophy, Users, Gamepad2, Settings, Palette } from 'lucide-react';
-import { motion } from 'framer-motion';
 import { toast } from 'sonner';
-import { AVAILABLE_THEMES as THEMES } from '../../../../features/themes/config/themeRegistry';
-import { useBodyTheme } from '../../../../features/themes/hooks/useBodyTheme';
-import { useTournamentTheme } from '../../../../features/themes/hooks/useTournamentTheme';
+
+import { AVAILABLE_THEMES as THEMES } from '@/features/themes/config/themeRegistry';
+import { useBodyTheme } from '@/features/themes/hooks/useBodyTheme';
+import { useTournamentTheme } from '@/features/themes/hooks/useTournamentTheme';
+import { AppButton } from '@/shared/components/ui/AppButton';
+import { useAuthStore } from '@/shared/store/authStore';
+
+import { createTournament, assignTournamentPermissions } from '../../api/tournamentsApi';
 
 export const CreateTournament = () => {
   const navigate = useNavigate();
@@ -21,7 +23,7 @@ export const CreateTournament = () => {
     participants_count: 8,
     is_public: false,
     has_third_place: false,
-    theme: 'default'
+    theme: 'default',
   });
 
   // Apply theme preview
@@ -31,46 +33,50 @@ export const CreateTournament = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
-    
+
+    // eslint-disable-next-line no-console
     console.log('Intentando crear torneo con User ID:', user.id); // DEBUG
-    
+
     setLoading(true);
 
     try {
       // 1. Crear el slug (url amigable)
-      const slug = formData.name
-        .toLowerCase()
-        .replace(/[^a-z0-9]+/g, '-')
-        .replace(/(^-|-$)+/g, '') + '-' + Math.random().toString(36).substring(2, 7);
+      const slug =
+        formData.name
+          .toLowerCase()
+          .replace(/[^a-z0-9]+/g, '-')
+          .replace(/(^-|-$)+/g, '') +
+        '-' +
+        Math.random().toString(36).substring(2, 7);
 
       // 2. Insertar torneo
       const dbFormat = formData.format === 'groups' ? 'single_elim' : formData.format;
-      const config = { 
+      const config = {
         participants_count: formData.participants_count,
         ...(formData.format === 'groups' ? { original_format: 'groups' } : {}),
         has_third_place: formData.has_third_place,
-        theme: formData.theme
+        theme: formData.theme,
       };
 
       const { data: tournament, error: tournamentError } = await createTournament({
-          name: formData.name,
-          slug,
-          game: formData.game,
-          format: dbFormat,
-          config,
-          is_public: formData.is_public,
-          created_by: user.id,
-          status: 'draft'
-        });
+        name: formData.name,
+        slug,
+        game: formData.game,
+        format: dbFormat,
+        config,
+        is_public: formData.is_public,
+        created_by: user.id,
+        status: 'draft',
+      });
 
       if (tournamentError) throw tournamentError;
 
       // 3. Asignar permisos al creador
       const { error: permError } = await assignTournamentPermissions({
-          user_id: user.id,
-          tournament_id: tournament.id,
-          can_edit: true
-        });
+        user_id: user.id,
+        tournament_id: tournament.id,
+        can_edit: true,
+      });
 
       if (permError) throw permError;
 
@@ -78,6 +84,7 @@ export const CreateTournament = () => {
       navigate(`/admin/torneos/${tournament.id}`);
       toast.success('Torneo creado exitosamente');
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error('Error creating tournament:', error);
       const message = error instanceof Error ? error.message : 'Error al crear el torneo';
       toast.error(message);
@@ -88,7 +95,7 @@ export const CreateTournament = () => {
 
   return (
     <div className="max-w-2xl mx-auto">
-      <AppButton 
+      <AppButton
         onClick={() => navigate('/admin/dashboard')}
         variant={formData.theme === 'valorant' ? 'secondary' : 'ghost'}
         theme={formData.theme}
@@ -98,7 +105,7 @@ export const CreateTournament = () => {
         Volver al Dashboard
       </AppButton>
 
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         className="glass-card"
@@ -109,14 +116,18 @@ export const CreateTournament = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-white">Crear Nuevo Torneo</h1>
-            <p className="text-text-muted text-sm">Configura los detalles básicos de tu competición</p>
+            <p className="text-text-muted text-sm">
+              Configura los detalles básicos de tu competición
+            </p>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Nombre */}
           <div>
-            <label className="block text-sm font-medium text-text-muted mb-2">Nombre del Torneo</label>
+            <label className="block text-sm font-medium text-text-muted mb-2">
+              Nombre del Torneo
+            </label>
             <input
               type="text"
               value={formData.name}
@@ -174,13 +185,18 @@ export const CreateTournament = () => {
                   onChange={(e) => setFormData({ ...formData, has_third_place: e.target.checked })}
                   className="toggle-checkbox absolute block w-6 h-6 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300"
                 />
-                <label 
-                  htmlFor="has_third_place" 
+                <label
+                  htmlFor="has_third_place"
                   className="toggle-label block overflow-hidden h-6 rounded-full cursor-pointer transition-colors duration-300"
                 ></label>
               </div>
-              <label htmlFor="has_third_place" className="text-sm text-gray-300 cursor-pointer select-none flex-1">
-                <span className="font-medium text-white block">Incluir partido por el 3er Puesto</span>
+              <label
+                htmlFor="has_third_place"
+                className="text-sm text-gray-300 cursor-pointer select-none flex-1"
+              >
+                <span className="font-medium text-white block">
+                  Incluir partido por el 3er Puesto
+                </span>
                 Genera automáticamente un partido entre los perdedores de las semifinales.
               </label>
             </div>
@@ -233,7 +249,7 @@ export const CreateTournament = () => {
               <Palette size={20} className="text-primary" />
               Apariencia
             </h2>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {THEMES.map((theme) => (
                 <button
@@ -242,28 +258,53 @@ export const CreateTournament = () => {
                   onClick={() => setFormData({ ...formData, theme: theme.id })}
                   className={`
                     relative group overflow-hidden rounded-xl border-2 text-left transition-all duration-300
-                    ${formData.theme === theme.id 
-                      ? 'border-primary bg-surface-highlight' 
-                      : 'border-border bg-surface hover:border-white/20'}
+                    ${
+                      formData.theme === theme.id
+                        ? 'border-primary bg-surface-highlight'
+                        : 'border-border bg-surface hover:border-white/20'
+                    }
                   `}
                 >
                   <div className="p-4 relative z-10">
                     <div className="flex justify-between items-start mb-2">
-                      <span className={`font-bold text-lg ${formData.theme === theme.id ? 'text-primary' : 'text-white'}`}>
+                      <span
+                        className={`font-bold text-lg ${formData.theme === theme.id ? 'text-primary' : 'text-white'}`}
+                      >
                         {theme.name}
                       </span>
                       {formData.theme === theme.id && (
-                        <span className="bg-primary text-white text-xs px-2 py-1 rounded font-bold">SELECCIONADO</span>
+                        <span className="bg-primary text-white text-xs px-2 py-1 rounded font-bold">
+                          SELECCIONADO
+                        </span>
                       )}
                     </div>
                     <p className="text-sm text-text-muted mb-4">{theme.description}</p>
-                    
+
                     {/* Mini Preview */}
-                    <div className="h-16 rounded-lg overflow-hidden relative border border-white/10" style={{ background: theme.palette.background }}>
-                        <div className="absolute inset-0 opacity-30" style={{ background: theme.palette.backgroundAlt }}></div>
-                        <div className="absolute top-2 left-2 right-2 h-2 rounded-full" style={{ background: theme.palette.surface }}></div>
-                        <div className="absolute top-5 left-2 w-1/3 h-8 rounded" style={{ background: theme.palette.surfaceAlt, borderColor: theme.palette.accent, borderWidth: theme.shapes.borderWidth }}></div>
-                        <div className="absolute top-5 right-2 w-1/2 h-4 rounded" style={{ background: theme.palette.accent }}></div>
+                    <div
+                      className="h-16 rounded-lg overflow-hidden relative border border-white/10"
+                      style={{ background: theme.palette.background }}
+                    >
+                      <div
+                        className="absolute inset-0 opacity-30"
+                        style={{ background: theme.palette.backgroundAlt }}
+                      ></div>
+                      <div
+                        className="absolute top-2 left-2 right-2 h-2 rounded-full"
+                        style={{ background: theme.palette.surface }}
+                      ></div>
+                      <div
+                        className="absolute top-5 left-2 w-1/3 h-8 rounded"
+                        style={{
+                          background: theme.palette.surfaceAlt,
+                          borderColor: theme.palette.accent,
+                          borderWidth: theme.shapes.borderWidth,
+                        }}
+                      ></div>
+                      <div
+                        className="absolute top-5 right-2 w-1/2 h-4 rounded"
+                        style={{ background: theme.palette.accent }}
+                      ></div>
                     </div>
                   </div>
                 </button>

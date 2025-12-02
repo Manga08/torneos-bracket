@@ -1,52 +1,46 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Plus, X, Upload, FileText, Trophy, Shuffle } from 'lucide-react';
-import { AppButton } from '../../../../components/ui/AppButton';
-import { BracketView } from '../../components/bracket/BracketView';
-import type { Tournament, Participant } from '../../../../types/database';
 
-interface TournamentConfig {
-  participants_count?: number;
-  original_format?: string;
-  has_third_place?: boolean;
-  logo_url?: string;
-  theme?: string;
-  [key: string]: unknown;
-}
+import { AppButton } from '@/shared/components/ui/AppButton';
+import type { Tournament, Participant } from '@/types/database';
+
+import { BracketView } from '../../components/bracket/BracketView';
+import type { TournamentConfig } from '../../types';
 
 export interface TournamentSetupSectionProps {
   tournament: Tournament;
   participants: Participant[];
   themeId?: string;
-  
+
   // Form states
   newParticipantName: string;
   addingParticipant: boolean;
-  selectedSlot: {seedIndex: number, participant?: Participant} | null;
-  
+  selectedSlot: { seedIndex: number; participant?: Participant } | null;
+
   // Import states
   isImportModalOpen: boolean;
   importText: string;
   importing: boolean;
-  
+
   // Callbacks
   onNewParticipantNameChange: (value: string) => void;
   onAddParticipant: (e?: React.FormEvent) => void;
-  onSelectSlot: (slot: {seedIndex: number, participant?: Participant} | null) => void;
-  
+  onSelectSlot: (slot: { seedIndex: number; participant?: Participant } | null) => void;
+
   onOpenImportModal: () => void;
   onCloseImportModal: () => void;
   onImportTextChange: (value: string) => void;
   onFileUpload: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onImportParticipants: () => void;
-  
+
   onUpdateConfig: (config: TournamentConfig) => void;
   onRandomizeSeeds: () => void;
-  
+
   // Bracket View Callbacks
   onSlotClick: (seedIndex: number, participant?: Participant) => void;
   onParticipantMove: (fromSeed: number, toSeed: number) => void;
   onDeleteParticipant: (participantId: string) => void;
-  
+
   // Edit permissions
   canEdit?: boolean;
 }
@@ -74,10 +68,11 @@ export const TournamentSetupSection = ({
   onSlotClick,
   onParticipantMove,
   onDeleteParticipant,
-  canEdit = true
+  canEdit = true,
 }: TournamentSetupSectionProps) => {
-  
-  const tournamentFormat = ((tournament.config as unknown as TournamentConfig)?.original_format as Tournament['format']) || tournament.format;
+  const tournamentFormat =
+    ((tournament.config as unknown as TournamentConfig)?.original_format as Tournament['format']) ||
+    tournament.format;
 
   return (
     <motion.div
@@ -103,14 +98,24 @@ export const TournamentSetupSection = ({
                     value={newParticipantName}
                     onChange={(e) => onNewParticipantNameChange(e.target.value)}
                     className="w-full bg-transparent border-none text-white placeholder:text-text-muted focus:ring-0 px-4 py-3 text-lg focus:outline-none"
-                    placeholder={selectedSlot ? `Añadir en posición #${selectedSlot.seedIndex + 1}...` : "Nombre del participante..."}
+                    placeholder={
+                      selectedSlot
+                        ? `Añadir en posición #${selectedSlot.seedIndex + 1}...`
+                        : 'Nombre del participante...'
+                    }
                     autoFocus
                   />
-                  
+
                   {selectedSlot && (
                     <div className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-1 rounded-full text-xs font-medium border border-primary/20 mr-2 animate-fade-in">
                       <span>Slot #{selectedSlot.seedIndex + 1}</span>
-                      <button type="button" onClick={() => onSelectSlot(null)} className="hover:text-white transition-colors"><X size={12} /></button>
+                      <button
+                        type="button"
+                        onClick={() => onSelectSlot(null)}
+                        className="hover:text-white transition-colors"
+                      >
+                        <X size={12} />
+                      </button>
                     </div>
                   )}
 
@@ -121,14 +126,18 @@ export const TournamentSetupSection = ({
                     theme={themeId}
                     isLoading={addingParticipant}
                     leftIcon={<Plus size={16} />}
-                    className={themeId === 'valorant' ? 'bg-white/5 hover:bg-white/10 border-l border-white/10 rounded-none! h-full px-6' : ''}
+                    className={
+                      themeId === 'valorant'
+                        ? 'bg-white/5 hover:bg-white/10 border-l border-white/10 rounded-none! h-full px-6'
+                        : ''
+                    }
                   >
                     Añadir
                   </AppButton>
                 </div>
               </div>
             </form>
-            
+
             <AppButton
               onClick={onOpenImportModal}
               variant="secondary"
@@ -162,24 +171,32 @@ export const TournamentSetupSection = ({
                   <X size={20} />
                 </button>
               </div>
-              
+
               <div className="p-6 space-y-6">
                 {/* File Upload Section */}
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-white">Opción 1: Subir archivo (CSV/Excel)</label>
+                  <label className="text-sm font-medium text-white">
+                    Opción 1: Subir archivo (CSV/Excel)
+                  </label>
                   <div className="border-2 border-dashed border-border rounded-xl p-6 text-center hover:border-primary/50 hover:bg-primary/5 transition-colors relative group">
-                    <input 
-                      type="file" 
-                      accept=".csv,.txt" 
+                    <input
+                      type="file"
+                      accept=".csv,.txt"
                       onChange={onFileUpload}
                       className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
                     />
-                    <FileText size={32} className="mx-auto text-text-muted mb-2 group-hover:text-primary transition-colors" />
-                    <p className="text-sm text-white font-medium">Haz clic o arrastra un archivo aquí</p>
+                    <FileText
+                      size={32}
+                      className="mx-auto text-text-muted mb-2 group-hover:text-primary transition-colors"
+                    />
+                    <p className="text-sm text-white font-medium">
+                      Haz clic o arrastra un archivo aquí
+                    </p>
                     <p className="text-xs text-text-muted mt-1">Formatos soportados: .csv, .txt</p>
                   </div>
                   <p className="text-xs text-text-muted">
-                    El archivo debe contener una lista de nombres, uno por fila. La primera columna se usará como nombre.
+                    El archivo debe contener una lista de nombres, uno por fila. La primera columna
+                    se usará como nombre.
                   </p>
                 </div>
 
@@ -205,12 +222,7 @@ export const TournamentSetupSection = ({
               </div>
 
               <div className="p-6 border-t border-border flex justify-end gap-3 bg-surface-dark">
-                <AppButton
-                  onClick={onCloseImportModal}
-                  variant="ghost"
-                  theme={themeId}
-                  size="sm"
-                >
+                <AppButton onClick={onCloseImportModal} variant="ghost" theme={themeId} size="sm">
                   Cancelar
                 </AppButton>
                 <AppButton
@@ -234,10 +246,10 @@ export const TournamentSetupSection = ({
       <div className="glass-card border-dashed border-border min-h-[300px] relative">
         <div className="flex flex-col md:flex-row justify-between items-center mb-8 px-4 gap-4">
           <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Trophy size={18} className="text-primary" /> 
+            <Trophy size={18} className="text-primary" />
             Vista Previa del Bracket
           </h3>
-          
+
           <div className="flex flex-wrap items-center gap-6">
             {/* 3rd Place Toggle for Single Elimination */}
             {tournamentFormat === 'single_elim' && (
@@ -247,22 +259,29 @@ export const TournamentSetupSection = ({
                     type="checkbox"
                     name="has_third_place_preview"
                     id="has_third_place_preview"
-                    checked={(tournament.config as unknown as TournamentConfig)?.has_third_place || false}
+                    checked={
+                      (tournament.config as unknown as TournamentConfig)?.has_third_place || false
+                    }
                     onChange={(e) => {
-                      const newConfig = { 
-                        ...(typeof tournament.config === 'string' ? JSON.parse(tournament.config) : tournament.config),
-                        has_third_place: e.target.checked 
+                      const newConfig = {
+                        ...(typeof tournament.config === 'string'
+                          ? JSON.parse(tournament.config)
+                          : tournament.config),
+                        has_third_place: e.target.checked,
                       };
                       onUpdateConfig(newConfig);
                     }}
                     className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300"
                   />
-                  <label 
-                    htmlFor="has_third_place_preview" 
+                  <label
+                    htmlFor="has_third_place_preview"
                     className="toggle-label block overflow-hidden h-5 rounded-full cursor-pointer transition-colors duration-300"
                   ></label>
                 </div>
-                <label htmlFor="has_third_place_preview" className="text-sm text-text-muted cursor-pointer select-none hover:text-white transition-colors">
+                <label
+                  htmlFor="has_third_place_preview"
+                  className="text-sm text-text-muted cursor-pointer select-none hover:text-white transition-colors"
+                >
                   Incluir 3er Puesto
                 </label>
               </div>
@@ -271,12 +290,12 @@ export const TournamentSetupSection = ({
             <div className="h-4 w-px bg-surface-highlight hidden md:block"></div>
 
             <div className="text-xs text-text-muted flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-white/20"></span> 
+              <span className="w-2 h-2 rounded-full bg-white/20"></span>
               <span className="hidden sm:inline">Arrastra para mover</span>
             </div>
-            
+
             {canEdit && (
-              <AppButton 
+              <AppButton
                 onClick={onRandomizeSeeds}
                 variant="secondary"
                 theme={themeId}
@@ -288,12 +307,12 @@ export const TournamentSetupSection = ({
             )}
           </div>
         </div>
-        
+
         <div className="overflow-hidden pb-4">
-          <BracketView 
-            tournamentId={tournament.id} 
-            participants={participants} 
-            isDraft={true} 
+          <BracketView
+            tournamentId={tournament.id}
+            participants={participants}
+            isDraft={true}
             format={tournamentFormat}
             hasThirdPlace={!!(tournament.config as unknown as TournamentConfig)?.has_third_place}
             onSlotClick={onSlotClick}
@@ -304,7 +323,7 @@ export const TournamentSetupSection = ({
 
         {/* Only show slot info if selected for adding */}
         {selectedSlot && !selectedSlot.participant && (
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={{ opacity: 1, scale: 1 }}
             className="absolute bottom-8 left-1/2 -translate-x-1/2 bg-surface border border-border rounded-full shadow-xl p-2 flex items-center gap-2 z-10"
@@ -312,7 +331,7 @@ export const TournamentSetupSection = ({
             <span className="px-3 text-sm font-medium text-white">
               Añadiendo en Slot #{selectedSlot.seedIndex + 1}
             </span>
-            <button 
+            <button
               onClick={() => onSelectSlot(null)}
               className="p-1 text-text-muted hover:text-white rounded-full transition-colors"
             >

@@ -1,8 +1,10 @@
-import { useState } from 'react';
-import type { UserRole } from '../types/authTypes';
-import type { Profile } from '../api/usersApi';
 import { Loader2, Edit2, Check, X, KeyRound } from 'lucide-react';
-import { AppButton } from '../../../components/ui/AppButton';
+import { useState } from 'react';
+
+import { AppButton } from '@/shared/components/ui/AppButton';
+
+import type { Profile } from '../api/usersApi';
+import type { UserRole } from '../types/authTypes';
 
 interface UserTableProps {
   profiles: Profile[];
@@ -14,14 +16,14 @@ interface UserTableProps {
   error: string | null;
 }
 
-export const UserTable = ({ 
-  profiles, 
-  availableRoles, 
-  onRoleChange, 
+export const UserTable = ({
+  profiles,
+  availableRoles,
+  onRoleChange,
   onDisplayNameChange,
   onSendPasswordReset,
-  loading, 
-  error 
+  loading,
+  error,
 }: UserTableProps) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
@@ -60,11 +62,7 @@ export const UserTable = ({
   }
 
   if (profiles.length === 0) {
-    return (
-      <div className="text-center py-12 text-text-muted">
-        No se encontraron usuarios.
-      </div>
-    );
+    return <div className="text-center py-12 text-text-muted">No se encontraron usuarios.</div>;
   }
 
   return (
@@ -97,23 +95,20 @@ export const UserTable = ({
                         if (e.key === 'Escape') cancelEditing();
                       }}
                     />
-                    <button 
+                    <button
                       onClick={() => saveEditing(profile.id)}
                       className="text-emerald-400 hover:text-emerald-300 p-1"
                     >
                       <Check size={14} />
                     </button>
-                    <button 
-                      onClick={cancelEditing}
-                      className="text-red-400 hover:text-red-300 p-1"
-                    >
+                    <button onClick={cancelEditing} className="text-red-400 hover:text-red-300 p-1">
                       <X size={14} />
                     </button>
                   </div>
                 ) : (
                   <div className="flex items-center gap-2 group">
                     <span>{profile.display_name || '-'}</span>
-                    <button 
+                    <button
                       onClick={() => startEditing(profile)}
                       className="opacity-0 group-hover:opacity-100 text-text-muted hover:text-primary transition-all p-1"
                       title="Editar nombre"

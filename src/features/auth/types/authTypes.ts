@@ -1,4 +1,4 @@
-import type { Profile } from '../../../types/database';
+import type { Profile } from '@/types/database';
 
 export type UserRole = 'super_admin' | 'admin' | 'editor' | 'viewer';
 

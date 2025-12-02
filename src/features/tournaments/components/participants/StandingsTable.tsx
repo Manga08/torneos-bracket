@@ -1,5 +1,6 @@
 import { useMemo } from 'react';
-import type { Match, Participant } from '../../../../types/database';
+
+import type { Match, Participant } from '@/types/database';
 
 interface StandingsTableProps {
   participants: Participant[];
@@ -21,12 +22,11 @@ interface Standing {
 }
 
 export const StandingsTable = ({ participants, matches }: StandingsTableProps) => {
-  
   const standings = useMemo(() => {
     const stats: Record<string, Standing> = {};
 
     // Initialize stats
-    participants.forEach(p => {
+    participants.forEach((p) => {
       stats[p.id] = {
         participantId: p.id,
         participantName: p.name,
@@ -38,12 +38,12 @@ export const StandingsTable = ({ participants, matches }: StandingsTableProps) =
         buchholz: 0,
         buchholzCut1: 0,
         sonnebornBerger: 0,
-        gamePoints: 0
+        gamePoints: 0,
       };
     });
 
     // Calculate basic stats
-    matches.forEach(match => {
+    matches.forEach((match) => {
       if (match.status !== 'completed' || !match.winner_id) return;
       if (!match.participant_a_id || !match.participant_b_id) return;
 
@@ -56,8 +56,8 @@ export const StandingsTable = ({ participants, matches }: StandingsTableProps) =
       pB.played++;
 
       // Add game points (scores)
-      pA.gamePoints += (match.score_a || 0);
-      pB.gamePoints += (match.score_b || 0);
+      pA.gamePoints += match.score_a || 0;
+      pB.gamePoints += match.score_b || 0;
 
       if (match.winner_id === match.participant_a_id) {
         pA.won++;
@@ -77,40 +77,44 @@ export const StandingsTable = ({ participants, matches }: StandingsTableProps) =
 
     // Calculate Tiebreakers (Buchholz, etc.)
     // This requires a second pass after points are calculated
-    Object.values(stats).forEach(player => {
+    Object.values(stats).forEach((player) => {
       let buchholz = 0;
       let sonnebornBerger = 0;
       const opponents: string[] = [];
 
-      matches.forEach(match => {
+      matches.forEach((match) => {
         if (match.status !== 'completed') return;
         if (match.participant_a_id === player.participantId && match.participant_b_id) {
           opponents.push(match.participant_b_id);
           if (match.winner_id === player.participantId) {
-             sonnebornBerger += stats[match.participant_b_id]?.points || 0;
-          } else if (!match.winner_id) { // Draw
-             sonnebornBerger += (stats[match.participant_b_id]?.points || 0) / 2;
+            sonnebornBerger += stats[match.participant_b_id]?.points || 0;
+          } else if (!match.winner_id) {
+            // Draw
+            sonnebornBerger += (stats[match.participant_b_id]?.points || 0) / 2;
           }
         } else if (match.participant_b_id === player.participantId && match.participant_a_id) {
           opponents.push(match.participant_a_id);
           if (match.winner_id === player.participantId) {
-             sonnebornBerger += stats[match.participant_a_id]?.points || 0;
-          } else if (!match.winner_id) { // Draw
-             sonnebornBerger += (stats[match.participant_a_id]?.points || 0) / 2;
+            sonnebornBerger += stats[match.participant_a_id]?.points || 0;
+          } else if (!match.winner_id) {
+            // Draw
+            sonnebornBerger += (stats[match.participant_a_id]?.points || 0) / 2;
           }
         }
       });
 
-      opponents.forEach(oppId => {
+      opponents.forEach((oppId) => {
         buchholz += stats[oppId]?.points || 0;
       });
 
       player.buchholz = buchholz;
       player.sonnebornBerger = sonnebornBerger;
-      
+
       // Buchholz Cut 1 (sum of opponents points excluding the lowest)
       if (opponents.length > 0) {
-        const opponentPoints = opponents.map(oppId => stats[oppId]?.points || 0).sort((a, b) => a - b);
+        const opponentPoints = opponents
+          .map((oppId) => stats[oppId]?.points || 0)
+          .sort((a, b) => a - b);
         player.buchholzCut1 = buchholz - opponentPoints[0];
       } else {
         player.buchholzCut1 = 0;
@@ -138,21 +142,32 @@ export const StandingsTable = ({ participants, matches }: StandingsTableProps) =
             <th className="px-4 py-3 text-center">P</th>
             <th className="px-4 py-3 text-center">E</th>
             <th className="px-4 py-3 text-center font-bold text-white">Pts</th>
-            <th className="px-4 py-3 text-center text-text-muted" title="Buchholz">BH</th>
-            <th className="px-4 py-3 text-center text-text-muted" title="Buchholz Cut 1">BH-1</th>
-            <th className="px-4 py-3 text-center text-text-muted" title="Sonneborn-Berger">SB</th>
+            <th className="px-4 py-3 text-center text-text-muted" title="Buchholz">
+              BH
+            </th>
+            <th className="px-4 py-3 text-center text-text-muted" title="Buchholz Cut 1">
+              BH-1
+            </th>
+            <th className="px-4 py-3 text-center text-text-muted" title="Sonneborn-Berger">
+              SB
+            </th>
           </tr>
         </thead>
         <tbody>
           {standings.map((stat, index) => (
-            <tr key={stat.participantId} className="bg-surface/50 border-b border-border hover:bg-white/5 transition-colors">
+            <tr
+              key={stat.participantId}
+              className="bg-surface/50 border-b border-border hover:bg-white/5 transition-colors"
+            >
               <td className="px-4 py-3 font-mono text-text-muted">{index + 1}</td>
               <td className="px-4 py-3 font-medium text-white">{stat.participantName}</td>
               <td className="px-4 py-3 text-center">{stat.played}</td>
               <td className="px-4 py-3 text-center text-success">{stat.won}</td>
               <td className="px-4 py-3 text-center text-danger">{stat.lost}</td>
               <td className="px-4 py-3 text-center text-text-muted">{stat.draw}</td>
-              <td className="px-4 py-3 text-center font-bold text-primary text-base">{stat.points}</td>
+              <td className="px-4 py-3 text-center font-bold text-primary text-base">
+                {stat.points}
+              </td>
               <td className="px-4 py-3 text-center text-text-muted">{stat.buchholz}</td>
               <td className="px-4 py-3 text-center text-text-muted">{stat.buchholzCut1}</td>
               <td className="px-4 py-3 text-center text-text-muted">{stat.sonnebornBerger}</td>

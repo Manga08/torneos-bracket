@@ -1,11 +1,13 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+
+import type { Tournament, Participant } from '@/types/database';
+
 import { TournamentSetupSection } from './TournamentSetupSection';
-import type { Tournament, Participant } from '../../../../types/database';
 
 // Mock BracketView to avoid complex rendering
 vi.mock('../../components/bracket/BracketView', () => ({
-  BracketView: () => <div data-testid="bracket-view-mock">Bracket View</div>
+  BracketView: () => <div data-testid="bracket-view-mock">Bracket View</div>,
 }));
 
 describe('TournamentSetupSection', () => {
@@ -20,11 +22,17 @@ describe('TournamentSetupSection', () => {
     slug: 'test',
     game: 'valorant',
     is_public: false,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   };
 
   const mockParticipants: Participant[] = [
-    { id: 'p1', name: 'Player 1', tournament_id: '1', created_at: new Date().toISOString(), seed: 1 }
+    {
+      id: 'p1',
+      name: 'Player 1',
+      tournament_id: '1',
+      created_at: new Date().toISOString(),
+      seed: 1,
+    },
   ];
 
   const defaultProps = {
@@ -54,7 +62,7 @@ describe('TournamentSetupSection', () => {
 
   it('renders participants list and add form', () => {
     render(<TournamentSetupSection {...defaultProps} />);
-    
+
     // Check for add input
     const input = screen.getByPlaceholderText(/Nombre del participante/i);
     expect(input).toBeInTheDocument();
@@ -62,7 +70,7 @@ describe('TournamentSetupSection', () => {
 
   it('handles adding a participant', () => {
     const { rerender } = render(<TournamentSetupSection {...defaultProps} />);
-    
+
     const input = screen.getByPlaceholderText(/Nombre del participante/i);
     fireEvent.change(input, { target: { value: 'New Player' } });
     expect(defaultProps.onNewParticipantNameChange).toHaveBeenCalledWith('New Player');
@@ -77,14 +85,16 @@ describe('TournamentSetupSection', () => {
 
   it('handles third place toggle', () => {
     render(<TournamentSetupSection {...defaultProps} />);
-    
+
     // Look for checkbox. Might need to find by label text.
     // "Incluir 3er Puesto"
     const checkbox = screen.getByLabelText(/Incluir 3er Puesto/i);
     fireEvent.click(checkbox);
-    
-    expect(defaultProps.onUpdateConfig).toHaveBeenCalledWith(expect.objectContaining({
-      has_third_place: true
-    }));
+
+    expect(defaultProps.onUpdateConfig).toHaveBeenCalledWith(
+      expect.objectContaining({
+        has_third_place: true,
+      }),
+    );
   });
 });

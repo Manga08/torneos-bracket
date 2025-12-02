@@ -1,13 +1,15 @@
 import { describe, it, expect } from 'vitest';
+
+import type { Participant, Match } from '@/types/database';
+
 import { calculateStandings, pairSwissRound } from './tournamentLogic';
-import type { Participant, Match } from '../../../types/database';
 
 describe('tournamentLogic', () => {
   const createParticipant = (id: string, name: string): Participant => ({
     id,
     name,
     tournament_id: 't1',
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   });
 
   const createMatch = (
@@ -16,7 +18,7 @@ describe('tournamentLogic', () => {
     pB: string,
     sA: number,
     sB: number,
-    status: 'completed' | 'pending' = 'completed'
+    status: 'completed' | 'pending' = 'completed',
   ): Match => ({
     id,
     tournament_id: 't1',
@@ -30,7 +32,7 @@ describe('tournamentLogic', () => {
     winner_id: sA > sB ? pA : sB > sA ? pB : null,
     status,
     created_at: new Date().toISOString(),
-    next_match_id: null
+    next_match_id: null,
   });
 
   describe('calculateStandings', () => {
@@ -76,18 +78,16 @@ describe('tournamentLogic', () => {
       // If no matches played, standings are default order (usually by input array or seed if logic handles it)
       // The current implementation of pairSwissRound likely sorts by points (0) then maybe random or seed?
       // Let's assume input order matters if points are equal.
-
       // const participants = [
       //   createParticipant('p1', 'P1'),
       //   createParticipant('p2', 'P2'),
       //   createParticipant('p3', 'P3'),
       //   createParticipant('p4', 'P4')
       // ];
-
       // Round 1, no matches
       // Logic usually pairs 1vs2, 3vs4 OR 1vs3, 2vs4 (Swiss fold).
       // Let's see what it returns.
-      // Note: pairSwissRound returns { matchId, participantA, participantB }[]? 
+      // Note: pairSwissRound returns { matchId, participantA, participantB }[]?
       // Wait, I need to check the return type in the file again or infer it.
       // The file read showed: returns { matchId: string, participantA: string, participantB: string }[]
       // Actually, looking at the file content I read earlier:
@@ -95,13 +95,10 @@ describe('tournamentLogic', () => {
       // I didn't read the full body of pairSwissRound.
       // I'll assume standard Swiss logic: Top half vs Bottom half or Neighbor pairing.
       // Let's just check it returns pairs for everyone.
-
       // I need to mock the matches array as empty for round 1
       // But wait, pairSwissRound usually takes *existing* matches to calculate standings.
-
-      // Actually, I'll skip deep testing of pairSwissRound logic without reading the code fully, 
+      // Actually, I'll skip deep testing of pairSwissRound logic without reading the code fully,
       // but I'll test that it returns *some* pairings.
-
       // Re-reading file content... I only read first 100 lines. pairSwissRound starts at line 93.
       // I should read the rest to be sure about the return type and logic.
     });
@@ -141,13 +138,13 @@ describe('tournamentLogic', () => {
       expect(pairings).toHaveLength(2);
 
       // Check first pairing (Winners)
-      const pair1 = pairings.find(p => p.participantA === 'p1' || p.participantB === 'p1');
+      const pair1 = pairings.find((p) => p.participantA === 'p1' || p.participantB === 'p1');
       expect(pair1).toBeDefined();
       // P1 should play P3
       expect([pair1?.participantA, pair1?.participantB]).toContain('p3');
 
       // Check second pairing (Losers)
-      const pair2 = pairings.find(p => p.participantA === 'p2' || p.participantB === 'p2');
+      const pair2 = pairings.find((p) => p.participantA === 'p2' || p.participantB === 'p2');
       expect(pair2).toBeDefined();
       // P2 should play P4
       expect([pair2?.participantA, pair2?.participantB]).toContain('p4');

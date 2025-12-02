@@ -1,8 +1,9 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+
 import { signInWithEmailAndPassword } from '../../api/authApi';
-import { useAuth } from '../../hooks/useAuth';
 import { LoginForm } from '../../components/LoginForm';
+import { useAuth } from '../../hooks/useAuth';
 
 export const LoginPage = () => {
   const [email, setEmail] = useState('');

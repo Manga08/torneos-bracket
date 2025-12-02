@@ -32,7 +32,14 @@ export interface Tournament {
   name: string;
   description?: string | null;
   status: 'draft' | 'active' | 'completed';
-  format: 'single_elim' | 'double_elim' | 'swiss' | 'groups' | 'round_robin' | 'single_elimination' | 'double_elimination';
+  format:
+    | 'single_elim'
+    | 'double_elim'
+    | 'swiss'
+    | 'groups'
+    | 'round_robin'
+    | 'single_elimination'
+    | 'double_elimination';
   user_id: string;
   created_by: string;
   config: Record<string, unknown>;

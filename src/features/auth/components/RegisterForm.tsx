@@ -8,7 +8,10 @@ export interface RegisterFormProps {
   confirmPassword: string;
   loading: boolean;
   error: string | null;
-  onChangeField: (field: 'fullName' | 'email' | 'password' | 'confirmPassword', value: string) => void;
+  onChangeField: (
+    field: 'fullName' | 'email' | 'password' | 'confirmPassword',
+    value: string,
+  ) => void;
   onSubmit: (e: React.FormEvent) => void;
 }
 
@@ -20,7 +23,7 @@ export const RegisterForm = ({
   loading,
   error,
   onChangeField,
-  onSubmit
+  onSubmit,
 }: RegisterFormProps) => {
   return (
     <div className="flex items-center justify-center min-h-[80vh]">
@@ -32,7 +35,7 @@ export const RegisterForm = ({
           <h2 className="text-2xl font-bold text-white">Crear cuenta</h2>
           <p className="text-text-muted text-sm mt-2">Únete para gestionar tus torneos</p>
         </div>
-        
+
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 text-red-200 p-3 mb-6 text-sm rounded-lg flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
@@ -42,7 +45,9 @@ export const RegisterForm = ({
 
         <form onSubmit={onSubmit} className="space-y-5">
           <div>
-            <label className="block text-sm font-medium text-text-muted mb-1.5">Nombre completo</label>
+            <label className="block text-sm font-medium text-text-muted mb-1.5">
+              Nombre completo
+            </label>
             <input
               type="text"
               value={fullName}
@@ -64,7 +69,7 @@ export const RegisterForm = ({
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-text-muted mb-1.5">Contraseña</label>
             <input
@@ -78,7 +83,9 @@ export const RegisterForm = ({
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-text-muted mb-1.5">Confirmar contraseña</label>
+            <label className="block text-sm font-medium text-text-muted mb-1.5">
+              Confirmar contraseña
+            </label>
             <input
               type="password"
               value={confirmPassword}
@@ -99,7 +106,10 @@ export const RegisterForm = ({
 
           <p className="mt-4 text-sm text-center text-text-muted">
             ¿Ya tienes cuenta?{' '}
-            <Link to="/login" className="text-primary hover:text-primary/80 hover:underline transition-colors">
+            <Link
+              to="/login"
+              className="text-primary hover:text-primary/80 hover:underline transition-colors"
+            >
               Inicia sesión
             </Link>
           </p>

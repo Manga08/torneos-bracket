@@ -1,3 +1,3 @@
-import { useAuthStore } from '../../../store/authStore';
+import { useAuthStore } from '@/shared/store/authStore';
 
 export const useAuth = () => useAuthStore();

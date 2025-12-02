@@ -1,4 +1,4 @@
-import type { Profile } from '../../../types/database';
+import type { Profile } from '@/types/database';
 
 export interface TournamentPermission {
   id: string;

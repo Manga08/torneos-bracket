@@ -1,5 +1,6 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+
 import { TournamentAdminHeader } from './TournamentAdminHeader';
 
 describe('TournamentAdminHeader', () => {
@@ -48,7 +49,7 @@ describe('TournamentAdminHeader', () => {
     const deleteButton = screen.getByText(/Borrar Torneo/i);
     fireEvent.click(deleteButton);
     expect(defaultProps.onDelete).toHaveBeenCalled();
-    
+
     // Start button (visible because status is draft)
     const startButton = screen.getByText(/Iniciar Torneo/i);
     fireEvent.click(startButton);
@@ -58,7 +59,7 @@ describe('TournamentAdminHeader', () => {
   it('highlights active tab', () => {
     // In draft mode, 'setup' and 'settings' are visible. 'bracket' is not.
     render(<TournamentAdminHeader {...defaultProps} activeTab="setup" />);
-    
+
     const setupTab = screen.getByText(/Configuración/i);
     expect(setupTab).toBeInTheDocument();
     // We can check class if we want, but presence is good enough for now.

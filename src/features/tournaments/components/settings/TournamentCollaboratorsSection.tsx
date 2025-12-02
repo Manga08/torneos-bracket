@@ -1,9 +1,10 @@
-import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Users, UserPlus, Trash2, Shield, Mail } from 'lucide-react';
-import { AppButton } from '../../../../components/ui/AppButton';
-import type { Tournament } from '../../../../types/database';
-import type { TournamentPermission } from '../../types/permissions';
+import { useState } from 'react';
+
+import type { TournamentPermission } from '@/features/tournaments/types/permissions';
+import { AppButton } from '@/shared/components/ui/AppButton';
+import type { Tournament } from '@/types/database';
 
 interface TournamentCollaboratorsSectionProps {
   tournament: Tournament;
@@ -19,7 +20,7 @@ export const TournamentCollaboratorsSection = ({
   canManagePermissions,
   onAddCollaborator,
   onRemoveCollaborator,
-  themeId
+  themeId,
 }: TournamentCollaboratorsSectionProps) => {
   const [email, setEmail] = useState('');
   const [isAdding, setIsAdding] = useState(false);
@@ -53,10 +54,10 @@ export const TournamentCollaboratorsSection = ({
         <Users size={20} className="text-primary" />
         Colaboradores
       </h4>
-      
+
       <p className="text-sm text-text-muted mb-6">
-        Los colaboradores tienen permisos para editar el torneo, gestionar participantes y actualizar resultados.
-        Solo el creador del torneo puede gestionar esta lista.
+        Los colaboradores tienen permisos para editar el torneo, gestionar participantes y
+        actualizar resultados. Solo el creador del torneo puede gestionar esta lista.
       </p>
 
       {/* Add Collaborator Form */}
@@ -110,7 +111,9 @@ export const TournamentCollaboratorsSection = ({
                   </div>
                   <div>
                     <p className="text-sm font-medium text-white">
-                      {permission.profile?.username || permission.profile?.email || 'Usuario desconocido'}
+                      {permission.profile?.username ||
+                        permission.profile?.email ||
+                        'Usuario desconocido'}
                     </p>
                     <p className="text-xs text-text-muted">
                       {permission.profile?.email || 'Sin email visible'}

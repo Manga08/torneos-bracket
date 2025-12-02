@@ -1,4 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
+
 import { fetchDashboardTournaments, createTournament } from './tournamentsApi';
 
 // Mock Supabase client using vi.hoisted to avoid hoisting issues
@@ -69,7 +70,7 @@ describe('tournamentsApi', () => {
         created_by: 'user-1',
         slug: 'new-tournament',
         config: {},
-        status: 'draft'
+        status: 'draft',
       };
 
       const createdTournament = { id: '1', ...newTournament };
@@ -80,9 +81,11 @@ describe('tournamentsApi', () => {
       const result = await createTournament(newTournament as any);
 
       expect(mockSupabase.from).toHaveBeenCalledWith('tournaments');
-      expect(mockInsert).toHaveBeenCalledWith(expect.objectContaining({
-        name: 'New Tournament'
-      }));
+      expect(mockInsert).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: 'New Tournament',
+        }),
+      );
       expect(result.data).toEqual(createdTournament);
     });
   });

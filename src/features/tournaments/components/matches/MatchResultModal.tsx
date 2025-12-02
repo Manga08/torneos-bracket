@@ -1,7 +1,8 @@
-import { useState, useEffect } from 'react';
 import { X, Trophy } from 'lucide-react';
-import type { Match, Participant } from '../../../../types/database';
-import { AppButton } from '../../../../components/ui/AppButton';
+import { useState, useEffect } from 'react';
+
+import { AppButton } from '@/shared/components/ui/AppButton';
+import type { Match, Participant } from '@/types/database';
 
 interface MatchResultModalProps {
   isOpen: boolean;
@@ -9,14 +10,26 @@ interface MatchResultModalProps {
   match: Match | null;
   participantA: Participant | undefined;
   participantB: Participant | undefined;
-  onSave: (matchId: string, scoreA: number, scoreB: number, winnerId: string | null) => Promise<void>;
+  onSave: (
+    matchId: string,
+    scoreA: number,
+    scoreB: number,
+    winnerId: string | null,
+  ) => Promise<void>;
 }
 
-export const MatchResultModal = ({ isOpen, onClose, match, participantA, participantB, onSave }: MatchResultModalProps) => {
+export const MatchResultModal = ({
+  isOpen,
+  onClose,
+  match,
+  participantA,
+  participantB,
+  onSave,
+}: MatchResultModalProps) => {
   const [scoreA, setScoreA] = useState(0);
   const [scoreB, setScoreB] = useState(0);
   const [loading, setLoading] = useState(false);
-  
+
   const isValorant = document.body.classList.contains('theme-valorant');
 
   useEffect(() => {
@@ -34,10 +47,11 @@ export const MatchResultModal = ({ isOpen, onClose, match, participantA, partici
       let winnerId: string | null = null;
       if (scoreA > scoreB) winnerId = match.participant_a_id;
       else if (scoreB > scoreA) winnerId = match.participant_b_id;
-      
+
       await onSave(match.id, scoreA, scoreB, winnerId);
       onClose();
     } catch (error) {
+      // eslint-disable-next-line no-console
       console.error(error);
     } finally {
       setLoading(false);
@@ -61,7 +75,9 @@ export const MatchResultModal = ({ isOpen, onClose, match, participantA, partici
           <div className="flex justify-between items-center gap-4 mb-8">
             {/* Team A */}
             <div className="flex-1 text-center">
-              <div className={`text-lg font-bold mb-2 truncate ${scoreA > scoreB ? 'text-primary' : 'text-white'}`}>
+              <div
+                className={`text-lg font-bold mb-2 truncate ${scoreA > scoreB ? 'text-primary' : 'text-white'}`}
+              >
                 {participantA?.name || 'TBD'}
               </div>
               <input
@@ -77,7 +93,9 @@ export const MatchResultModal = ({ isOpen, onClose, match, participantA, partici
 
             {/* Team B */}
             <div className="flex-1 text-center">
-              <div className={`text-lg font-bold mb-2 truncate ${scoreB > scoreA ? 'text-primary' : 'text-white'}`}>
+              <div
+                className={`text-lg font-bold mb-2 truncate ${scoreB > scoreA ? 'text-primary' : 'text-white'}`}
+              >
                 {participantB?.name || 'TBD'}
               </div>
               <input

@@ -1,4 +1,5 @@
-import type { Tournament } from '../../../types/database';
+import type { Tournament } from '@/types/database';
+
 import type { TournamentPermission } from '../types/permissions';
 
 export interface CanEditTournamentParams {
@@ -27,7 +28,7 @@ export function canEditTournament({
     // We assume that if a permission row exists for this user and tournament, they can edit.
     // In the future we might check p.can_edit === true explicitly.
     const hasPermission = permissions.some(
-      (p) => p.user_id === userId && p.tournament_id === tournament.id
+      (p) => p.user_id === userId && p.tournament_id === tournament.id,
     );
     if (hasPermission) return true;
   }

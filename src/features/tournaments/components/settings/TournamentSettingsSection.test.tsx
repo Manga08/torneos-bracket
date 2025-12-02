@@ -1,7 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+
+import type { Tournament } from '@/types/database';
+
 import { TournamentSettingsSection } from './TournamentSettingsSection';
-import type { Tournament } from '../../../../types/database';
 
 describe('TournamentSettingsSection', () => {
   const mockTournament: Tournament = {
@@ -15,7 +17,7 @@ describe('TournamentSettingsSection', () => {
     slug: 'old-name',
     game: 'valorant',
     is_public: false,
-    created_at: new Date().toISOString()
+    created_at: new Date().toISOString(),
   };
 
   const defaultProps = {
@@ -28,27 +30,29 @@ describe('TournamentSettingsSection', () => {
 
   it('renders current settings', () => {
     render(<TournamentSettingsSection {...defaultProps} />);
-    
+
     expect(screen.getByDisplayValue('Old Name')).toBeInTheDocument();
   });
 
   it('handles name change', () => {
     render(<TournamentSettingsSection {...defaultProps} />);
-    
+
     const input = screen.getByDisplayValue('Old Name');
     fireEvent.change(input, { target: { value: 'New Name' } });
-    
-    expect(defaultProps.onUpdateTournament).toHaveBeenCalledWith(expect.objectContaining({
-      name: 'New Name'
-    }));
+
+    expect(defaultProps.onUpdateTournament).toHaveBeenCalledWith(
+      expect.objectContaining({
+        name: 'New Name',
+      }),
+    );
   });
 
   it('handles save action', () => {
     render(<TournamentSettingsSection {...defaultProps} />);
-    
+
     const saveButton = screen.getByText(/Guardar Cambios/i); // Assuming text
     fireEvent.click(saveButton);
-    
+
     expect(defaultProps.onSaveSettings).toHaveBeenCalled();
   });
 });

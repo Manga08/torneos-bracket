@@ -23,7 +23,7 @@ export interface AppTheme {
   typography: {
     headingFont: string;
     bodyFont: string;
-    headingTransform: "none" | "uppercase";
+    headingTransform: 'none' | 'uppercase';
     headingLetterSpacing: string;
   };
 

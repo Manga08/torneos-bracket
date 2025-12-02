@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { RegisterForm } from '../../components/RegisterForm';
+
 import { signUpWithEmailAndPassword } from '../../api/authApi';
+import { RegisterForm } from '../../components/RegisterForm';
 import { useAuth } from '../../hooks/useAuth';
 
 export function RegisterPage() {
@@ -23,7 +24,10 @@ export function RegisterPage() {
     }
   }, [user, loading, navigate]);
 
-  const handleChangeField = (field: 'fullName' | 'email' | 'password' | 'confirmPassword', value: string) => {
+  const handleChangeField = (
+    field: 'fullName' | 'email' | 'password' | 'confirmPassword',
+    value: string,
+  ) => {
     if (field === 'fullName') setFullName(value);
     if (field === 'email') setEmail(value);
     if (field === 'password') setPassword(value);
@@ -54,7 +58,9 @@ export function RegisterPage() {
       setTimeout(() => {
         navigate('/login');
       }, 3000);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (err: any) {
+      // eslint-disable-next-line no-console
       console.error('[RegisterPage] signUp error', err);
       setError(err.message ?? 'Error al crear la cuenta.');
     } finally {
@@ -69,7 +75,19 @@ export function RegisterPage() {
           <div className="glass-card w-full max-w-md p-8 animate-fade-in text-center">
             <div className="mb-4 flex justify-center">
               <div className="h-12 w-12 rounded-full bg-emerald-500/20 flex items-center justify-center text-emerald-400">
-                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  width="24"
+                  height="24"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
               </div>
             </div>
             <h2 className="text-2xl font-bold text-white mb-2">¡Cuenta creada!</h2>

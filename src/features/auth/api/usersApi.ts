@@ -1,4 +1,5 @@
-import { supabase } from '../../../shared/api/supabaseClient';
+import { supabase } from '@/shared/api/supabaseClient';
+
 import type { UserRole } from '../types/authTypes';
 
 export interface Profile {
@@ -17,11 +18,7 @@ export interface FetchUsersParams {
 
 // Lista paginada de usuarios, filtrable por email
 export async function fetchProfiles(params: FetchUsersParams = {}): Promise<Profile[]> {
-  const {
-    search = '',
-    page = 1,
-    pageSize = 20,
-  } = params;
+  const { search = '', page = 1, pageSize = 20 } = params;
 
   const from = (page - 1) * pageSize;
   const to = from + pageSize - 1;
@@ -40,6 +37,7 @@ export async function fetchProfiles(params: FetchUsersParams = {}): Promise<Prof
   const { data, error } = await query;
 
   if (error) {
+    // eslint-disable-next-line no-console
     console.error('[fetchProfiles] error', error);
     throw error;
   }
@@ -64,6 +62,7 @@ export async function updateUserProfile(
     .single();
 
   if (error) {
+    // eslint-disable-next-line no-console
     console.error('[updateUserProfile] error', error);
     throw error;
   }

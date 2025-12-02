@@ -1,4 +1,5 @@
-import { supabase } from '../../../shared/api/supabaseClient';
+import { supabase } from '@/shared/api/supabaseClient';
+import { ENV } from '@/shared/config';
 
 export async function signInWithEmailAndPassword(email: string, password: string) {
   return await supabase.auth.signInWithPassword({ email, password });
@@ -16,12 +17,12 @@ export async function signUpWithEmailAndPassword(
       data: {
         full_name: fullName ?? null,
       },
-      // TODO: Ajusta esto para que apunte a tu URL de confirmación de email / post-signup.
-      // emailRedirectTo: import.meta.env.VITE_AUTH_EMAIL_REDIRECT_URL,
+      emailRedirectTo: ENV.VITE_AUTH_EMAIL_REDIRECT_URL,
     },
   });
 
   if (error) {
+    // eslint-disable-next-line no-console
     console.error('[signUpWithEmailAndPassword] error', error);
     throw error;
   }
@@ -40,6 +41,7 @@ export async function updateCurrentUserEmail(newEmail: string) {
   });
 
   if (error) {
+    // eslint-disable-next-line no-console
     console.error('[updateCurrentUserEmail] error', error);
     throw error;
   }
@@ -54,6 +56,7 @@ export async function updateCurrentUserPassword(newPassword: string) {
   });
 
   if (error) {
+    // eslint-disable-next-line no-console
     console.error('[updateCurrentUserPassword] error', error);
     throw error;
   }
@@ -64,11 +67,11 @@ export async function updateCurrentUserPassword(newPassword: string) {
 // Envía email de recuperación de contraseña a un email dado
 export async function sendPasswordResetEmail(email: string) {
   const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
-    // TODO: Ajusta este redirectTo en la fase de UI de reset-password
-    // redirectTo: import.meta.env.VITE_AUTH_RESET_PASSWORD_REDIRECT_URL,
+    redirectTo: ENV.VITE_AUTH_RESET_PASSWORD_REDIRECT_URL,
   });
 
   if (error) {
+    // eslint-disable-next-line no-console
     console.error('[sendPasswordResetEmail] error', error);
     throw error;
   }
@@ -84,6 +87,7 @@ export async function updateCurrentUserProfile(update: { display_name?: string |
   } = await supabase.auth.getUser();
 
   if (userError || !user) {
+    // eslint-disable-next-line no-console
     console.error('[updateCurrentUserProfile] no user', userError);
     throw userError ?? new Error('No authenticated user');
   }
@@ -96,6 +100,7 @@ export async function updateCurrentUserProfile(update: { display_name?: string |
     .single();
 
   if (error) {
+    // eslint-disable-next-line no-console
     console.error('[updateCurrentUserProfile] error', error);
     throw error;
   }

@@ -1,7 +1,9 @@
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+
+import type { Participant, Match } from '@/types/database';
+
 import { BracketView } from './BracketView';
-import type { Participant, Match } from '../../../../types/database';
 
 // Mock Supabase
 vi.mock('../../../../shared/api/supabaseClient', () => ({
@@ -13,13 +15,13 @@ vi.mock('../../../../shared/api/supabaseClient', () => ({
       unsubscribe: vi.fn(),
     })),
     removeChannel: vi.fn(),
-  }
+  },
 }));
 
 describe('BracketView', () => {
   const participants: Participant[] = [
     { id: 'p1', name: 'Player 1', tournament_id: 't1', created_at: '', seed: 1 },
-    { id: 'p2', name: 'Player 2', tournament_id: 't1', created_at: '', seed: 2 }
+    { id: 'p2', name: 'Player 2', tournament_id: 't1', created_at: '', seed: 2 },
   ];
 
   const matches: Match[] = [
@@ -36,24 +38,24 @@ describe('BracketView', () => {
       winner_id: null,
       status: 'pending',
       created_at: '',
-      next_match_id: null
-    }
+      next_match_id: null,
+    },
   ];
 
   it('renders bracket with matches', () => {
     render(
-      <BracketView 
-        tournamentId="t1" 
-        participants={participants} 
+      <BracketView
+        tournamentId="t1"
+        participants={participants}
         matches={matches}
         isDraft={false}
-      />
+      />,
     );
 
     // Check for participants
     expect(screen.getByText('Player 1')).toBeInTheDocument();
     expect(screen.getByText('Player 2')).toBeInTheDocument();
-    
+
     // Check for round label
     expect(screen.getByText(/Ronda 1/i)).toBeInTheDocument();
   });

@@ -18,7 +18,7 @@ export const LoginForm = ({
   error,
   onEmailChange,
   onPasswordChange,
-  onSubmit
+  onSubmit,
 }: LoginFormProps) => {
   return (
     <div className="flex items-center justify-center min-h-[80vh]">
@@ -30,7 +30,7 @@ export const LoginForm = ({
           <h2 className="text-2xl font-bold text-white">Bienvenido de nuevo</h2>
           <p className="text-text-muted text-sm mt-2">Ingresa a tu cuenta de administrador</p>
         </div>
-        
+
         {error && (
           <div className="bg-red-500/10 border border-red-500/20 text-red-200 p-3 mb-6 text-sm rounded-lg flex items-center gap-2">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500"></span>
@@ -50,7 +50,7 @@ export const LoginForm = ({
               required
             />
           </div>
-          
+
           <div>
             <label className="block text-sm font-medium text-text-muted mb-1.5">Contraseña</label>
             <input
@@ -73,7 +73,10 @@ export const LoginForm = ({
 
           <p className="mt-4 text-sm text-center text-text-muted">
             ¿No tienes cuenta?{' '}
-            <Link to="/register" className="text-primary hover:text-primary/80 hover:underline transition-colors">
+            <Link
+              to="/register"
+              className="text-primary hover:text-primary/80 hover:underline transition-colors"
+            >
               Crear cuenta
             </Link>
           </p>

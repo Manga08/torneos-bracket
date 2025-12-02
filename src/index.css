@@ -1,21 +1,21 @@
 /* Import Fonts for Themes */
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Barlow:wght@400;500;600;700&family=Teko:wght@400;500;600;700&display=swap');
 
-@import "tailwindcss";
+@import 'tailwindcss';
 
 /* stylelint-disable-next-line at-rule-no-unknown */
 @theme {
   /* BASE THEME TOKENS (Default) */
-  --color-background: #0f1016; 
-  --color-surface: #1a1b26; 
-  --color-surface-highlight: #24283b; 
-  --color-surface-dark: #111827; 
-  
-  --color-primary: #6366f1; 
-  --color-primary-hover: #4f46e5; 
-  
-  --color-text-main: #fafafa; 
-  --color-text-muted: #a1a1aa; 
+  --color-background: #0f1016;
+  --color-surface: #1a1b26;
+  --color-surface-highlight: #24283b;
+  --color-surface-dark: #111827;
+
+  --color-primary: #6366f1;
+  --color-primary-hover: #4f46e5;
+
+  --color-text-main: #fafafa;
+  --color-text-muted: #a1a1aa;
 
   --color-success: #22c55e;
   --color-warning: #eab308;
@@ -24,27 +24,37 @@
 
   --color-border: rgba(255, 255, 255, 0.1);
   --color-background-glow: #1e1b4b;
-  
+
   --bracket-connector-color: #6366f1;
   --bracket-connector-width: 2px;
   --bracket-connector-opacity: 0.5;
 
-  --font-display: "Inter", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
+
   --animate-fade-in: fade-in 0.5s ease-out;
   --animate-slide-up: slide-up 0.5s ease-out;
   --animate-dash-flow: dash-flow 3s linear infinite;
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes slide-up {
-  from { transform: translateY(20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
 }
 
 @keyframes dash-flow {
@@ -71,24 +81,30 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background: radial-gradient(circle at 50% 0%, var(--color-background-glow) 0%, var(--color-background) 50%);
-  transition: background 0.5s ease, color 0.5s ease;
+  background: radial-gradient(
+    circle at 50% 0%,
+    var(--color-background-glow) 0%,
+    var(--color-background) 50%
+  );
+  transition:
+    background 0.5s ease,
+    color 0.5s ease;
 }
 
 /* =========================================
    THEME: DEFAULT
    ========================================= */
 .theme-default {
-  --color-background: #0f1016; 
-  --color-surface: #1a1b26; 
-  --color-surface-highlight: #24283b; 
-  --color-surface-dark: #111827; 
-  
-  --color-primary: #6366f1; 
-  --color-primary-hover: #4f46e5; 
-  
-  --color-text-main: #fafafa; 
-  --color-text-muted: #a1a1aa; 
+  --color-background: #0f1016;
+  --color-surface: #1a1b26;
+  --color-surface-highlight: #24283b;
+  --color-surface-dark: #111827;
+
+  --color-primary: #6366f1;
+  --color-primary-hover: #4f46e5;
+
+  --color-text-main: #fafafa;
+  --color-text-muted: #a1a1aa;
 
   --color-success: #22c55e;
   --color-warning: #eab308;
@@ -97,48 +113,48 @@ body {
 
   --color-border: rgba(255, 255, 255, 0.1);
   --color-background-glow: #1e1b4b;
-  
+
   --bracket-connector-color: #6366f1;
   --bracket-connector-width: 2px;
   --bracket-connector-opacity: 0.5;
 
-  --font-display: "Inter", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  --font-display: 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
 }
 
 /* =========================================
    THEME: VALORANT
    ========================================= */
 .theme-valorant {
-  --color-background: #0F1923;
+  --color-background: #0f1923;
   --color-surface: rgba(15, 25, 35, 0.95);
-  --color-surface-highlight: #1F2731;
-  --color-surface-dark: #0F1923;
-  
-  --color-primary: #FF4655;
-  --color-primary-hover: #D93644;
-  
-  --color-text-main: #ECE8E1;
-  --color-text-muted: #8B978F;
-  
-  --color-border: rgba(236, 232, 225, 0.15);
-  --color-background-glow: #FF4655;
+  --color-surface-highlight: #1f2731;
+  --color-surface-dark: #0f1923;
 
-  --bracket-connector-color: #00F9E6;
+  --color-primary: #ff4655;
+  --color-primary-hover: #d93644;
+
+  --color-text-main: #ece8e1;
+  --color-text-muted: #8b978f;
+
+  --color-border: rgba(236, 232, 225, 0.15);
+  --color-background-glow: #ff4655;
+
+  --bracket-connector-color: #00f9e6;
   --bracket-connector-width: 2px;
   --bracket-connector-opacity: 0.6;
 
-  --font-display: "Teko", sans-serif;
-  --font-body: "Barlow", sans-serif;
+  --font-display: 'Teko', sans-serif;
+  --font-body: 'Barlow', sans-serif;
 
   /* Valorant Specific Legibility Vars */
   --valorant-scrim-gradient: transparent; /* Removed heavy scrim */
   --valorant-chip-bg: rgba(15, 25, 35, 0.9);
   --valorant-chip-border: rgba(255, 255, 255, 0.1);
-  --valorant-text-strong: #FFFFFF;
-  --valorant-text-secondary: #C5C5C5;
-  
-  --valorant-btn-primary-bg: linear-gradient(135deg, #FF4655 0%, #BD3944 100%);
+  --valorant-text-strong: #ffffff;
+  --valorant-text-secondary: #c5c5c5;
+
+  --valorant-btn-primary-bg: linear-gradient(135deg, #ff4655 0%, #bd3944 100%);
   --valorant-btn-secondary-bg: rgba(15, 25, 35, 0.8);
 
   /* Apply font globally for this theme */
@@ -147,7 +163,7 @@ body {
 
 /* App Title Override */
 .app-title {
-  font-family: "Inter", system-ui, sans-serif !important;
+  font-family: 'Inter', system-ui, sans-serif !important;
 }
 
 /* Valorant Utility Classes */
@@ -163,7 +179,7 @@ body {
   padding: 0.25rem 0.75rem;
   border-radius: 0; /* Square corners for chips */
   color: var(--valorant-text-strong);
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
   transition: all 0.2s ease;
   display: inline-flex;
   align-items: center;
@@ -176,7 +192,7 @@ body {
 }
 
 .theme-valorant .valorant-text-shadow {
-  text-shadow: 0 2px 10px rgba(0,0,0,0.8);
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.8);
 }
 
 .theme-valorant .valorant-info-strip {
@@ -184,7 +200,7 @@ body {
   padding: 0;
   border-left: none;
   color: var(--valorant-text-secondary);
-  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.8);
 }
 
 .theme-valorant .valorant-tab-active {
@@ -257,18 +273,18 @@ body {
 
 /* Valorant Legibility Improvements */
 .theme-valorant .valorant-metadata {
-  color: #F5F5F5 !important;
-  text-shadow: 0 1px 3px rgba(0,0,0,0.6);
+  color: #f5f5f5 !important;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
   font-weight: 500;
 }
 
 .theme-valorant .valorant-tab-text {
-  color: #E0E0E0;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+  color: #e0e0e0;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
 }
 
 .theme-valorant .valorant-tab-text:hover {
-  color: #FFFFFF;
+  color: #ffffff;
 }
 
 /* Icon adjustments for Valorant theme */
@@ -278,7 +294,7 @@ body {
 
 .theme-valorant body {
   background-color: var(--color-background);
-  background-image: 
+  background-image:
     linear-gradient(to bottom, rgba(15, 25, 35, 0.85), rgba(15, 25, 35, 0.95)),
     url('/themes/valorant/bg-main.jpg');
   background-size: cover;
@@ -325,7 +341,13 @@ body {
   display: block;
   height: 2px;
   width: 100%;
-  background: linear-gradient(90deg, transparent 0%, var(--color-primary) 20%, var(--color-primary) 80%, transparent 100%);
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-primary) 20%,
+    var(--color-primary) 80%,
+    transparent 100%
+  );
   position: absolute;
   bottom: 0;
   left: 0;
@@ -342,7 +364,7 @@ body {
   display: flex;
   align-items: center;
   gap: 1rem;
-  text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Better readability */
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5); /* Better readability */
 }
 
 .theme-valorant .section-header::before {
@@ -354,10 +376,10 @@ body {
   transform: rotate(45deg);
 }
 
-.theme-valorant h1, 
-.theme-valorant h2, 
+.theme-valorant h1,
+.theme-valorant h2,
 .theme-valorant h3 {
-  text-shadow: 0 2px 10px rgba(0,0,0,0.5); /* Global text shadow for headers in Valorant theme */
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5); /* Global text shadow for headers in Valorant theme */
 }
 
 .theme-valorant .btn-primary {
@@ -380,7 +402,6 @@ body {
 .theme-valorant .input-modern:focus {
   @apply border-primary ring-0;
 }
-
 
 /* =========================================
    MATCH LIST VIEW STYLES
@@ -434,12 +455,12 @@ body {
   transition: all 0.2s ease;
 }
 
-.theme-valorant .match-list-item[data-status="completed"] {
+.theme-valorant .match-list-item[data-status='completed'] {
   border-left-color: var(--color-primary); /* Red accent for completed */
   background: linear-gradient(90deg, rgba(255, 70, 85, 0.05) 0%, transparent 100%);
 }
 
-.theme-valorant .match-list-item[data-status="pending"] {
+.theme-valorant .match-list-item[data-status='pending'] {
   border-left-color: rgba(255, 255, 255, 0.2); /* Grey accent for pending */
 }
 
@@ -596,12 +617,14 @@ body {
 
 .theme-valorant .input-score {
   @apply bg-black/50 border border-white/10 rounded-none text-white font-display;
-  box-shadow: inset 0 2px 10px rgba(0,0,0,0.5);
+  box-shadow: inset 0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
 .theme-valorant .input-score:focus {
   @apply border-primary ring-0;
-  box-shadow: inset 0 2px 10px rgba(0,0,0,0.5), 0 0 15px rgba(255, 70, 85, 0.2);
+  box-shadow:
+    inset 0 2px 10px rgba(0, 0, 0, 0.5),
+    0 0 15px rgba(255, 70, 85, 0.2);
 }
 
 /* =========================================
@@ -613,7 +636,6 @@ body {
 
 /* Valorant Theme */
 /* Removed semantic classes for BracketView as requested to revert to original design */
-
 
 /* =========================================
    STANDINGS TABLE STYLES

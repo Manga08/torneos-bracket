@@ -16,23 +16,23 @@ export const valorantTheme: AppTheme = {
     textMain: '#ECE8E1',
     textMuted: '#8B978F',
     border: 'rgba(236, 232, 225, 0.15)',
-    glow: '#FF4655'
+    glow: '#FF4655',
   },
   typography: {
     headingFont: '"Teko", sans-serif',
     bodyFont: '"Rajdhani", sans-serif',
     headingTransform: 'uppercase',
-    headingLetterSpacing: '1px'
+    headingLetterSpacing: '1px',
   },
   shapes: {
     cardRadius: '0px',
     buttonRadius: '0px',
     useDiagonals: true,
-    borderWidth: '1px'
+    borderWidth: '1px',
   },
   assets: {
     backgroundImage: '/themes/valorant/bg-main.jpg',
     overlayPattern: '/themes/valorant/pattern-diagonal.svg',
-    logoMark: '/themes/valorant/logo-mark.svg'
-  }
+    logoMark: '/themes/valorant/logo-mark.svg',
+  },
 };

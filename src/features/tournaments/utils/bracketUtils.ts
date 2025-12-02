@@ -1,4 +1,4 @@
-import type { Participant, Match } from '../../../types/database';
+import type { Participant, Match } from '@/types/database';
 
 // Make BracketMatch fully compatible with Match for easier usage
 interface BracketMatch extends Match {
@@ -9,7 +9,7 @@ interface BracketMatch extends Match {
 export const generateSingleEliminationMatches = (
   tournamentId: string,
   participants: Participant[],
-  hasThirdPlace: boolean = false
+  hasThirdPlace: boolean = false,
 ): BracketMatch[] => {
   const matches: BracketMatch[] = [];
   const count = participants.length;
@@ -37,9 +37,8 @@ export const generateSingleEliminationMatches = (
 
     for (let matchIdx = 0; matchIdx < matchesInRound; matchIdx++) {
       const matchId = generateUUID();
-      const nextMatchId = round < totalRounds
-        ? nextRoundMap.get(`${round + 1}-${Math.floor(matchIdx / 2)}`)
-        : null;
+      const nextMatchId =
+        round < totalRounds ? nextRoundMap.get(`${round + 1}-${Math.floor(matchIdx / 2)}`) : null;
 
       const match: BracketMatch = {
         id: matchId,
@@ -54,7 +53,7 @@ export const generateSingleEliminationMatches = (
         score_b: 0,
         winner_id: null,
         status: 'pending',
-        next_match_id: nextMatchId || null
+        next_match_id: nextMatchId || null,
       };
 
       matches.push(match);
@@ -67,7 +66,7 @@ export const generateSingleEliminationMatches = (
     // The semi-finals are at round = totalRounds - 1
     // We need to find the two semi-final matches
     const semiFinalRound = totalRounds - 1;
-    const semiFinalMatches = matches.filter(m => m.round_number === semiFinalRound);
+    const semiFinalMatches = matches.filter((m) => m.round_number === semiFinalRound);
 
     if (semiFinalMatches.length === 2) {
       const thirdPlaceMatchId = generateUUID();
@@ -84,12 +83,12 @@ export const generateSingleEliminationMatches = (
         score_b: 0,
         winner_id: null,
         status: 'pending',
-        next_match_id: null
+        next_match_id: null,
       };
       matches.push(thirdPlaceMatch);
 
       // Link semi-finals losers to this match
-      semiFinalMatches.forEach(m => {
+      semiFinalMatches.forEach((m) => {
         m.loser_match_id = thirdPlaceMatchId;
       });
     }
@@ -97,7 +96,9 @@ export const generateSingleEliminationMatches = (
 
   // Asignar participantes a la primera ronda (Round 1)
   // Ordenamos los partidos de la ronda 1 para llenarlos
-  const round1Matches = matches.filter(m => m.round_number === 1).sort((a, b) => a.match_number - b.match_number);
+  const round1Matches = matches
+    .filter((m) => m.round_number === 1)
+    .sort((a, b) => a.match_number - b.match_number);
 
   // Ordenar participantes por seed para asegurar que se colocan en los slots correctos visualmente
   const sortedParticipants = [...participants].sort((a, b) => (a.seed || 0) - (b.seed || 0));
@@ -117,7 +118,7 @@ export const generateSingleEliminationMatches = (
 
   // Manejo de BYES (Pases directos)
   // Si un partido de ronda 1 tiene solo un participante, ese participante pasa automáticamente
-  round1Matches.forEach(match => {
+  round1Matches.forEach((match) => {
     if (match.participant_a_id && !match.participant_b_id) {
       match.winner_id = match.participant_a_id;
       match.status = 'completed';
@@ -139,7 +140,7 @@ export const generateSingleEliminationMatches = (
 const propagateWinner = (allMatches: BracketMatch[], completedMatch: BracketMatch) => {
   if (!completedMatch.next_match_id || !completedMatch.winner_id) return;
 
-  const nextMatch = allMatches.find(m => m.id === completedMatch.next_match_id);
+  const nextMatch = allMatches.find((m) => m.id === completedMatch.next_match_id);
   if (nextMatch) {
     // Determinar si viene del slot A (par) o B (impar) en la ronda anterior
     // La lógica de vinculación fue: matchIdx -> nextMatchIdx = floor(matchIdx / 2)
@@ -158,13 +159,13 @@ const propagateWinner = (allMatches: BracketMatch[], completedMatch: BracketMatc
 
 export const generateDoubleEliminationMatches = (
   tournamentId: string,
-  participants: Participant[]
+  participants: Participant[],
 ): BracketMatch[] => {
   const count = participants.length;
   // Fallback for small brackets
   if (count < 4) {
     const simple = generateSingleEliminationMatches(tournamentId, participants);
-    simple.forEach(m => m.stage = 'main'); // Keep as main/single elim
+    simple.forEach((m) => (m.stage = 'main')); // Keep as main/single elim
     return simple;
   }
 
@@ -183,9 +184,8 @@ export const generateDoubleEliminationMatches = (
     const matchesInRound = Math.pow(2, totalUpperRounds - r);
     for (let i = 0; i < matchesInRound; i++) {
       const matchId = generateUUID();
-      const nextMatchId = r < totalUpperRounds
-        ? upperMap.get(`${r + 1}-${Math.floor(i / 2)}`)?.id
-        : null; // Will be linked to Grand Final later
+      const nextMatchId =
+        r < totalUpperRounds ? upperMap.get(`${r + 1}-${Math.floor(i / 2)}`)?.id : null; // Will be linked to Grand Final later
 
       const match: BracketMatch = {
         id: matchId,
@@ -201,7 +201,7 @@ export const generateDoubleEliminationMatches = (
         winner_id: null,
         status: 'pending',
         next_match_id: nextMatchId || null,
-        loser_match_id: null // Will be linked to Lower Bracket
+        loser_match_id: null, // Will be linked to Lower Bracket
       };
       upperMatches.push(match);
       upperMap.set(`${r}-${i}`, match);
@@ -209,7 +209,9 @@ export const generateDoubleEliminationMatches = (
   }
 
   // Fill Upper Round 1 with participants
-  const upperRound1 = upperMatches.filter(m => m.round_number === 1).sort((a, b) => a.match_number - b.match_number);
+  const upperRound1 = upperMatches
+    .filter((m) => m.round_number === 1)
+    .sort((a, b) => a.match_number - b.match_number);
   const sortedParticipants = [...participants].sort((a, b) => (a.seed || 0) - (b.seed || 0));
 
   sortedParticipants.forEach((participant, index) => {
@@ -276,7 +278,7 @@ export const generateDoubleEliminationMatches = (
         score_b: 0,
         winner_id: null,
         status: 'pending',
-        next_match_id: nextMatchId || null
+        next_match_id: nextMatchId || null,
       };
       lowerMatches.push(match);
       lowerMap.set(`${r}-${i}`, match);
@@ -290,8 +292,12 @@ export const generateDoubleEliminationMatches = (
   // ...
 
   // Upper R1 -> Lower R1
-  const upperR1 = upperMatches.filter(m => m.round_number === 1).sort((a, b) => a.match_number - b.match_number);
-  const lowerR1 = lowerMatches.filter(m => m.round_number === 1).sort((a, b) => a.match_number - b.match_number);
+  const upperR1 = upperMatches
+    .filter((m) => m.round_number === 1)
+    .sort((a, b) => a.match_number - b.match_number);
+  const lowerR1 = lowerMatches
+    .filter((m) => m.round_number === 1)
+    .sort((a, b) => a.match_number - b.match_number);
 
   // Mapping logic:
   // Upper R1 match i loser -> Lower R1 match floor(i/2).
@@ -310,7 +316,9 @@ export const generateDoubleEliminationMatches = (
   //      Upper R3 -> Lower R4
   //      Upper R4 -> Lower R6
   for (let k = 2; k <= totalUpperRounds; k++) {
-    const upperRoundK = upperMatches.filter(m => m.round_number === k).sort((a, b) => a.match_number - b.match_number);
+    const upperRoundK = upperMatches
+      .filter((m) => m.round_number === k)
+      .sort((a, b) => a.match_number - b.match_number);
 
     // Target Lower Round is 2*k - 2
     // Exception: The Upper Final (last round) loser goes to the Lower Final (last round)
@@ -319,7 +327,9 @@ export const generateDoubleEliminationMatches = (
     // Formula 2*k - 2 works: 2*3 - 2 = 4. Correct.
 
     const targetLowerRoundNum = 2 * k - 2;
-    const lowerTargetRound = lowerMatches.filter(m => m.round_number === targetLowerRoundNum).sort((a, b) => a.match_number - b.match_number);
+    const lowerTargetRound = lowerMatches
+      .filter((m) => m.round_number === targetLowerRoundNum)
+      .sort((a, b) => a.match_number - b.match_number);
 
     upperRoundK.forEach((uMatch, i) => {
       // In these rounds, the number of matches in Upper R(k) equals matches in Lower R(2k-2).
@@ -332,8 +342,8 @@ export const generateDoubleEliminationMatches = (
   }
 
   // 4. Grand Final
-  const upperFinal = upperMatches.find(m => m.round_number === totalUpperRounds);
-  const lowerFinal = lowerMatches.find(m => m.round_number === totalLowerRounds);
+  const upperFinal = upperMatches.find((m) => m.round_number === totalUpperRounds);
+  const lowerFinal = lowerMatches.find((m) => m.round_number === totalLowerRounds);
 
   const grandFinal: BracketMatch = {
     id: generateUUID(),
@@ -348,7 +358,7 @@ export const generateDoubleEliminationMatches = (
     score_b: 0,
     winner_id: null,
     status: 'pending',
-    next_match_id: null
+    next_match_id: null,
   };
 
   if (upperFinal) upperFinal.next_match_id = grandFinal.id || null;
@@ -359,7 +369,7 @@ export const generateDoubleEliminationMatches = (
 
 export const generateSwissMatches = (
   tournamentId: string,
-  participants: Participant[]
+  participants: Participant[],
 ): BracketMatch[] => {
   const matches: BracketMatch[] = [];
   const count = participants.length;
@@ -384,13 +394,13 @@ export const generateSwissMatches = (
         score_b: 0,
         winner_id: null,
         status: 'pending',
-        next_match_id: null
+        next_match_id: null,
       });
     }
   }
 
   // Fill Round 1 for preview
-  const round1Matches = matches.filter(m => m.round_number === 1);
+  const round1Matches = matches.filter((m) => m.round_number === 1);
   participants.forEach((p, idx) => {
     const matchIdx = Math.floor(idx / 2);
     if (matchIdx < round1Matches.length) {
@@ -404,9 +414,9 @@ export const generateSwissMatches = (
 
 export const generateGroupStageMatches = (
   tournamentId: string,
-  participants: Participant[]
+  participants: Participant[],
 ): BracketMatch[] => {
-  // Simple implementation: 
+  // Simple implementation:
   // 1. Divide participants into groups of 4 (approx)
   // 2. Generate Round Robin matches for each group
   // 3. Generate a Single Elim bracket for the top 2 of each group (Playoffs)
@@ -444,7 +454,7 @@ export const generateGroupStageMatches = (
           score_b: 0,
           winner_id: null,
           status: 'pending',
-          next_match_id: null
+          next_match_id: null,
         });
       }
     }
@@ -460,11 +470,11 @@ export const generateGroupStageMatches = (
     name: `Winner/Runner-up Group ${String.fromCharCode(65 + Math.floor(i / 2))}`,
     seed: i + 1,
     created_at: new Date().toISOString(),
-    meta: {}
+    meta: {},
   }));
 
   const playoffMatches = generateSingleEliminationMatches(tournamentId, playoffParticipants);
-  playoffMatches.forEach(m => {
+  playoffMatches.forEach((m) => {
     m.stage = 'playoffs';
     // Offset round numbers to appear after groups? Or keep as separate stage.
     // Let's keep as separate stage 'playoffs' starting at Round 1

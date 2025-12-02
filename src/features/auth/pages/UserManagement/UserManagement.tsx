@@ -1,13 +1,15 @@
+import { Search, Users, Shield, UserCheck } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '../../hooks/useAuth';
-import { fetchProfiles, updateUserRole, updateUserProfile } from '../../api/usersApi';
+
+import type { UserRole } from '@/features/auth/types/authTypes';
+import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
+
 import { sendPasswordResetEmail } from '../../api/authApi';
+import { fetchProfiles, updateUserRole, updateUserProfile } from '../../api/usersApi';
 import type { Profile } from '../../api/usersApi';
-import type { UserRole } from '../../types/authTypes';
 import { UserTable } from '../../components/UserTable';
-import { Search, Users, Shield, UserCheck } from 'lucide-react';
-import { ConfirmDialog } from '../../../../components/ui/ConfirmDialog';
+import { useAuth } from '../../hooks/useAuth';
 
 const AVAILABLE_ROLES: UserRole[] = ['super_admin', 'admin', 'editor', 'viewer'];
 
@@ -58,11 +60,10 @@ export function UserManagement() {
       setError(null);
       setSuccessMessage(null);
       const updated = await updateUserRole(profileId, newRole);
-      setProfiles((prev) =>
-        prev.map((p) => (p.id === profileId ? updated : p)),
-      );
+      setProfiles((prev) => prev.map((p) => (p.id === profileId ? updated : p)));
       setSuccessMessage('Rol actualizado correctamente.');
     } catch (err: unknown) {
+      // eslint-disable-next-line no-console
       console.error('[handleRoleChange] error', err);
       const message = err instanceof Error ? err.message : 'Error actualizando rol';
       setError(message);
@@ -74,11 +75,10 @@ export function UserManagement() {
       setError(null);
       setSuccessMessage(null);
       const updated = await updateUserProfile(profileId, { display_name: newDisplayName });
-      setProfiles((prev) =>
-        prev.map((p) => (p.id === profileId ? updated : p)),
-      );
+      setProfiles((prev) => prev.map((p) => (p.id === profileId ? updated : p)));
       setSuccessMessage('Nombre actualizado correctamente.');
     } catch (err: unknown) {
+      // eslint-disable-next-line no-console
       console.error('[handleDisplayNameChange] error', err);
       const message = err instanceof Error ? err.message : 'Error actualizando nombre';
       setError(message);
@@ -99,6 +99,7 @@ export function UserManagement() {
       await sendPasswordResetEmail(userToReset.email);
       setSuccessMessage(`Correo de recuperación enviado a ${userToReset.email}.`);
     } catch (err: unknown) {
+      // eslint-disable-next-line no-console
       console.error('[handleSendPasswordReset] error', err);
       const message = err instanceof Error ? err.message : 'Error enviando correo de recuperación';
       setError(message);
@@ -108,19 +109,22 @@ export function UserManagement() {
     }
   };
 
-  if (loading) return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
+  if (loading)
+    return <div className="min-h-screen flex items-center justify-center">Cargando...</div>;
   if (!isSuperAdmin) return null;
 
   // Stats calculation
   const totalUsers = profiles.length;
-  const adminsCount = profiles.filter(p => p.role === 'admin' || p.role === 'super_admin').length;
-  const viewersCount = profiles.filter(p => p.role === 'viewer').length;
+  const adminsCount = profiles.filter((p) => p.role === 'admin' || p.role === 'super_admin').length;
+  const viewersCount = profiles.filter((p) => p.role === 'viewer').length;
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 animate-fade-in">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-white mb-2">Gestión de Usuarios</h1>
-        <p className="text-text-muted">Administra los roles y permisos de los usuarios de la plataforma.</p>
+        <p className="text-text-muted">
+          Administra los roles y permisos de los usuarios de la plataforma.
+        </p>
       </div>
 
       {/* Stats Cards */}
@@ -172,7 +176,10 @@ export function UserManagement() {
         <div className="flex flex-col sm:flex-row justify-between items-center gap-4 mb-6">
           <h2 className="text-xl font-semibold text-white">Lista de Usuarios</h2>
           <div className="relative w-full sm:w-auto">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none" size={18} />
+            <Search
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted pointer-events-none"
+              size={18}
+            />
             <input
               type="text"
               placeholder="Buscar por email..."
