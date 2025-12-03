@@ -215,38 +215,80 @@ FOR UPDATE USING (
 
 ## 🏗️ Arquitectura del Proyecto
 
-El código sigue una arquitectura modular basada en **Features**, diseñada para escalar.
+Este proyecto adopta una **Arquitectura Modular basada en Features** (Feature-Sliced Design simplificado). A diferencia de la estructura tradicional por capas (donde tienes carpetas gigantes de `components`, `hooks`, `pages`), aquí organizamos el código por **dominio de negocio**.
+
+### 🧠 Filosofía: ¿Por qué Features?
+
+El objetivo es la **escalabilidad** y la **mantenibilidad**.
+
+- **Cohesión**: Todo lo relacionado con una funcionalidad (ej: Autenticación) vive junto.
+- **Desacoplamiento**: Modificar la lógica de los Torneos no debería romper el Login.
+- **Escalabilidad**: Es fácil agregar nuevas features sin aumentar la complejidad cognitiva del proyecto base.
+
+### 📐 Estructura Ideal de una Feature
+
+Cada feature funciona como una "mini-aplicación" autocontenida. Esta es la estructura canónica que debe seguir cualquier nueva funcionalidad:
+
+```
+src/features/nombre-feature/
+├── api/          # Servicios de conexión a backend (Supabase)
+├── components/   # Componentes UI privados de esta feature
+├── hooks/        # Lógica de estado y reglas de negocio (Custom Hooks)
+├── pages/        # Vistas completas que se inyectan en el Router
+├── types/        # Tipos TypeScript, Interfaces y DTOs propios del dominio
+├── utils/        # Funciones puras de ayuda específicas
+└── index.ts      # Public API: Exporta SOLO lo que el resto de la app necesita usar
+```
+
+_Nota: Actualmente algunas features antiguas pueden no tener la carpeta `types` separada y dependen de `src/types` globales, pero el objetivo es migrar hacia la estructura ideal._
+
+### 📂 Estructura Actual del Proyecto
+
+Así es como se materializa esta arquitectura en nuestro código fuente hoy:
 
 ```
 src/
-├── app/                  # Capa de composición global
-│   ├── layout/           # Shell de la aplicación (Navbar, Footer)
-│   ├── providers/        # Contextos globales (Auth, Router, Theme)
-│   └── router/           # Definición de rutas y Guards
+├── app/                  # Capa de Aplicación (Orquestación)
+│   ├── layout/           # Shell principal (AppLayout) que envuelve las rutas
+│   ├── providers/        # Contextos globales (Auth, Theme, QueryClient)
+│   └── router/           # Configuración de rutas (React Router) y Guards de seguridad
 │
 ├── features/             # Módulos de dominio (El corazón de la app)
-│   ├── auth/             # Login, Registro, Perfil
-│   ├── tournaments/      # Lógica de torneos, brackets, partidos
-│   │   ├── api/          # Endpoints y servicios
-│   │   ├── components/   # Componentes específicos (BracketView, MatchModal)
-│   │   ├── hooks/        # Lógica de negocio (useTournament, usePermissions)
-│   │   └── pages/        # Vistas principales
-│   └── themes/           # Configuración y lógica de temas visuales
+│   ├── auth/             # Feature: Autenticación y Gestión de Usuarios
+│   │   ├── api/          # Llamadas a Supabase Auth y Profiles
+│   │   ├── components/   # Formularios de Login, Registro y Tablas de usuarios
+│   │   ├── hooks/        # Hooks como useAuth, useUserManagement
+│   │   ├── pages/        # Páginas: LoginPage, RegisterPage, AccountPage
+│   │   └── types/        # Tipos locales de usuario y auth
+│   ├── tournaments/      # Feature: Gestión de Torneos y Brackets
+│   │   ├── api/          # CRUD de torneos, participantes y partidos
+│   │   ├── components/   # Vistas del Bracket, Modales de resultados, Settings
+│   │   ├── hooks/        # Lógica compleja (useTournament, useBracket)
+│   │   ├── pages/        # Dashboard, Detalle de Torneo, Vista Pública
+│   │   ├── types/        # Tipos de dominio (Tournament, Match, Participant)
+│   │   └── utils/        # Algoritmos de generación de brackets y validaciones
+│   └── themes/           # Feature: Sistema de Temas Visuales
+│       ├── config/       # Definiciones de temas (Valorant, FIFA, Default)
+│       ├── hooks/        # Hook para inyectar variables CSS (useTheme)
+│       └── types/        # Definiciones de la interfaz AppTheme
 │
-├── shared/               # Utilidades reutilizables
-│   ├── api/              # Cliente Supabase singleton
-│   ├── components/ui/    # UI Kit (Botones, Modales, Inputs)
-│   ├── config/           # Variables de entorno
-│   └── store/            # Estado global (Zustand)
+├── shared/               # Utilidades reutilizables (Shared Kernel)
+│   ├── api/              # Cliente Supabase singleton y helpers de fetch
+│   ├── components/       # UI Kit genérico (Botones, Inputs, Dialogs, Navbar)
+│   ├── config/           # Variables de entorno (env.ts)
+│   ├── constants/        # Constantes estáticas de la app
+│   └── store/            # Stores globales de Zustand (authStore)
 │
-└── types/                # Definiciones de tipos globales (Database)
+├── types/                # Definiciones de tipos globales (Database Schema)
+├── App.tsx               # Componente raíz que monta Providers y Router
+└── main.tsx              # Punto de entrada de React (ReactDOM.createRoot)
 ```
 
 ### Reglas de Oro 🥇
 
-1.  **Feature Isolation**: Lo que pasa en `features/auth` se queda en `features/auth`. Si algo debe ser compartido, muévelo a `shared/`.
-2.  **Imports Limpios**: Usa los alias (`@/shared`, `@/features`) en lugar de rutas relativas largas (`../../`).
-3.  **Single Source of Truth**: Los tipos de base de datos viven en `src/types/database.ts`.
+1.  **Feature Isolation**: Una feature no debe importar detalles internos de otra. La comunicación debe ser mínima y a través de interfaces públicas.
+2.  **Shared es Sagrado**: `shared/` contiene código que podría usarse en _cualquier_ app (botones, cliente http). No debe contener lógica de negocio ("goles", "torneos").
+3.  **Single Source of Truth**: Aunque cada feature tenga sus tipos, el esquema de la base de datos (`database.ts`) es la verdad absoluta para los datos persistidos.
 
 ---
 
@@ -357,6 +399,7 @@ El sistema de temas es flexible y permite cambiar radicalmente la apariencia. Su
 
 3.  **Definir Estilos CSS**:
     En `src/index.css`, crea el bloque para tu tema. Aquí es donde ocurre la magia de las variables CSS:
+
     ```css
     .theme-cyberpunk {
       /* Variables Base (Sobrescriben los defaults) */
@@ -376,6 +419,7 @@ El sistema de temas es flexible y permite cambiar radicalmente la apariencia. Su
       }
     }
     ```
+
     _Nota: Asegúrate de importar cualquier fuente nueva al inicio de `index.css`._
 
 ---
