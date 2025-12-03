@@ -161,6 +161,250 @@ body {
   font-family: var(--font-body);
 }
 
+/* =========================================
+   THEME: FIFA (EA FC)
+   ========================================= */
+.theme-fifa {
+  --color-background: #050810;
+  --color-surface: #0b1420;
+  --color-surface-highlight: #111827;
+  --color-surface-dark: #050810;
+
+  --color-primary: #6fff38;
+  --color-primary-hover: #5ce62e;
+  --color-primary-soft: rgba(111, 255, 56, 0.12);
+
+  --color-accent: #18e5ff;
+
+  --color-text-main: #f9fafb;
+  --color-text-muted: #9ca3af;
+
+  --color-border: #1f2937;
+  --color-border-strong: #4b5563;
+  --color-background-glow: rgba(111, 255, 56, 0.4);
+
+  --bracket-connector-color: #6fff38;
+  --bracket-connector-width: 2px;
+  --bracket-connector-opacity: 0.6;
+
+  --font-display: 'Barlow Condensed', system-ui, sans-serif;
+  --font-body: 'Barlow', system-ui, sans-serif;
+
+  /* FIFA Specific Vars */
+  --shadow-soft: 0 18px 45px rgba(0, 0, 0, 0.65);
+  --shadow-glow-primary: 0 0 30px rgba(111, 255, 56, 0.4);
+  --fifa-chip-bg: rgba(11, 20, 32, 0.9);
+  --fifa-chip-border: rgba(111, 255, 56, 0.3);
+
+  font-family: var(--font-body);
+}
+
+/* FIFA Helper Classes */
+
+/* FIFA Button System */
+.theme-fifa .fifa-btn-primary {
+  @apply font-semibold;
+  color: #050810;
+  background: linear-gradient(135deg, #6fff38 0%, #38ff80 100%);
+  box-shadow: 0 0 20px rgba(111, 255, 56, 0.25);
+  border-radius: 9999px;
+  border: none;
+  padding: 0.75rem 1.5rem;
+  transition: all 0.2s ease-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-family: var(--font-display);
+}
+
+.theme-fifa .fifa-btn-primary:hover {
+  filter: brightness(1.1);
+  transform: translateY(-1px);
+  box-shadow: 0 0 30px rgba(111, 255, 56, 0.4);
+}
+
+.theme-fifa .fifa-btn-primary:active {
+  transform: scale(0.98);
+}
+
+.theme-fifa .fifa-btn-secondary {
+  background: rgba(5, 10, 16, 0.8);
+  border: 1px solid rgba(111, 255, 56, 0.3);
+  color: #f9fafb;
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  font-family: var(--font-body);
+  font-weight: 600;
+}
+
+.theme-fifa .fifa-btn-secondary:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  background: rgba(111, 255, 56, 0.05);
+  box-shadow: 0 0 15px rgba(111, 255, 56, 0.1);
+}
+
+.theme-fifa .fifa-btn-ghost {
+  background: transparent;
+  border: 1px solid transparent;
+  color: var(--color-primary);
+  font-family: var(--font-body);
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  border-radius: 9999px;
+  transition: all 0.2s ease-out;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.theme-fifa .fifa-btn-ghost:hover {
+  background: rgba(111, 255, 56, 0.05);
+  color: #fff;
+}
+
+.theme-fifa .fifa-btn-danger {
+  background: rgba(239, 68, 68, 0.1);
+  color: #fecaca;
+  border: 1px solid rgba(239, 68, 68, 0.5);
+  border-radius: 9999px;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease-out;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.theme-fifa .fifa-btn-danger:hover {
+  background: rgba(239, 68, 68, 0.2);
+  box-shadow: 0 0 15px rgba(239, 68, 68, 0.3);
+}
+
+/* FIFA Chip */
+.theme-fifa .fifa-chip {
+  background-color: var(--fifa-chip-bg);
+  border: 1px solid var(--fifa-chip-border);
+  color: var(--color-text-main);
+  padding: 0.25rem 0.75rem;
+  border-radius: 999px;
+  font-family: var(--font-display);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  box-shadow: 0 0 10px rgba(111, 255, 56, 0.1);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+/* FIFA Specific UI Overrides */
+.theme-fifa .glass-card {
+  background: rgba(11, 20, 32, 0.85);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+  backdrop-filter: blur(12px);
+  box-shadow: var(--shadow-soft);
+}
+
+.theme-fifa .glass-card:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 20px rgba(111, 255, 56, 0.15);
+}
+
+.theme-fifa .bracket-node {
+  @apply bg-surface border border-white/5;
+  background: linear-gradient(135deg, #050810, #061726);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(111, 255, 56, 0.22);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.4);
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.18s ease-out,
+    box-shadow 0.18s ease-out,
+    border-color 0.18s ease-out,
+    background 0.18s ease-out;
+}
+
+.theme-fifa .bracket-node:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 20px rgba(0, 0, 0, 0.6);
+  border-color: rgba(111, 255, 56, 0.5);
+}
+
+.theme-fifa .bracket-node:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.theme-fifa .bracket-node::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  border-top: 1px solid rgba(111, 255, 56, 0.25);
+  border-left: 1px solid rgba(111, 255, 56, 0.08);
+}
+
+.theme-fifa .match-score {
+  color: var(--color-primary);
+  font-family: 'Teko', system-ui, sans-serif;
+  font-size: 1.4em;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+}
+
+.theme-fifa .round-title {
+  border-bottom: 2px solid rgba(111, 255, 56, 0.6);
+  padding-bottom: 0.25rem;
+}
+
+.theme-fifa .fifa-text-glow {
+  text-shadow:
+    0 0 8px rgba(111, 255, 56, 0.45),
+    0 0 18px rgba(40, 255, 200, 0.25);
+}
+
+.theme-fifa .match-list-item {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 14px;
+  transition: all 0.2s ease-out;
+}
+
+.theme-fifa .match-list-item:hover {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 15px rgba(111, 255, 56, 0.1);
+  transform: translateY(-1px);
+}
+
+.theme-fifa .match-score {
+  color: var(--color-primary);
+  font-family: 'Teko', sans-serif;
+  font-size: 1.4em;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+}
+
+.theme-fifa .modal-content {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+}
+
+.theme-fifa .modal-header {
+  background: var(--color-surface-highlight);
+  border-bottom: 1px solid var(--color-border);
+}
+
 /* App Title Override */
 .app-title {
   font-family: 'Inter', system-ui, sans-serif !important;

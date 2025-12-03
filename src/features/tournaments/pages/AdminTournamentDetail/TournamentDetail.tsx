@@ -1096,7 +1096,9 @@ export const TournamentDetail = () => {
   }
 
   return (
-    <div className="animate-fade-in">
+    <div
+      className={`animate-fade-in ${themeId === 'fifa' ? 'fifa-pitch-bg fifa-triangles min-h-screen' : ''}`}
+    >
       <Toaster position="top-right" theme="dark" />
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
@@ -1366,6 +1368,7 @@ export const TournamentDetail = () => {
         match={selectedMatch}
         participantA={participants.find((p) => p.id === selectedMatch?.participant_a_id)}
         participantB={participants.find((p) => p.id === selectedMatch?.participant_b_id)}
+        theme={themeId}
         onSave={handleSaveResult}
       />
     </div>

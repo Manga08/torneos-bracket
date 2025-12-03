@@ -1,6 +1,7 @@
 import { X, Trophy } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
+import type { ThemeId } from '@/features/themes/types/themeTypes';
 import { AppButton } from '@/shared/components/ui/AppButton';
 import type { Match, Participant } from '@/types/database';
 
@@ -10,6 +11,7 @@ interface MatchResultModalProps {
   match: Match | null;
   participantA: Participant | undefined;
   participantB: Participant | undefined;
+  theme?: ThemeId;
   onSave: (
     matchId: string,
     scoreA: number,
@@ -24,13 +26,12 @@ export const MatchResultModal = ({
   match,
   participantA,
   participantB,
+  theme,
   onSave,
 }: MatchResultModalProps) => {
   const [scoreA, setScoreA] = useState(0);
   const [scoreB, setScoreB] = useState(0);
   const [loading, setLoading] = useState(false);
-
-  const isValorant = document.body.classList.contains('theme-valorant');
 
   useEffect(() => {
     if (match) {
@@ -109,12 +110,7 @@ export const MatchResultModal = ({
           </div>
 
           <div className="flex gap-3">
-            <AppButton
-              onClick={onClose}
-              variant="ghost"
-              className="flex-1"
-              theme={isValorant ? 'valorant' : undefined}
-            >
+            <AppButton onClick={onClose} variant="ghost" className="flex-1" theme={theme}>
               Cancelar
             </AppButton>
             <AppButton
@@ -122,7 +118,7 @@ export const MatchResultModal = ({
               variant="primary"
               className="flex-1"
               isLoading={loading}
-              theme={isValorant ? 'valorant' : undefined}
+              theme={theme}
             >
               Guardar Resultado
             </AppButton>

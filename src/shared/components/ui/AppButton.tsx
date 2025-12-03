@@ -28,6 +28,12 @@ const BUTTON_STYLES = {
     ghost: 'valorant-btn-ghost',
     danger: 'valorant-btn-secondary border-red-500/50 text-red-400 hover:bg-red-500/10', // Map danger to secondary with red tint
   },
+  fifa: {
+    primary: 'fifa-btn-primary',
+    secondary: 'fifa-btn-secondary',
+    ghost: 'fifa-btn-ghost',
+    danger: 'fifa-btn-danger',
+  },
 } as const;
 
 const SIZES = {

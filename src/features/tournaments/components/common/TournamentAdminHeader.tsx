@@ -62,7 +62,7 @@ export const TournamentAdminHeader = ({
             <div>
               <div className="flex items-center gap-3 mb-2">
                 <h1
-                  className={`text-4xl font-bold text-white tracking-tight drop-shadow-md ${themeId === 'valorant' ? 'valorant-text-shadow' : ''}`}
+                  className={`text-4xl font-bold text-white tracking-tight drop-shadow-md ${themeId === 'valorant' ? 'valorant-text-shadow' : ''} ${themeId === 'fifa' ? 'fifa-text-glow' : ''}`}
                 >
                   {name}
                 </h1>

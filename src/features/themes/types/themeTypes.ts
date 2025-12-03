@@ -1,10 +1,11 @@
-export type ThemeId = 'default' | 'valorant';
+export type ThemeId = 'default' | 'valorant' | 'fifa';
 
 export interface AppTheme {
   id: ThemeId;
   name: string;
   description: string;
   previewColor: string;
+  previewGradient?: string;
 
   palette: {
     background: string;

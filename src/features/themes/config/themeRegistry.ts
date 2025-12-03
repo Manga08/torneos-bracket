@@ -1,11 +1,13 @@
 import type { AppTheme, ThemeId } from '../types/themeTypes';
 
 import { defaultTheme } from './defaultTheme';
+import { fifaTheme } from './fifaTheme';
 import { valorantTheme } from './valorantTheme';
 
 export const THEME_CONFIGS: Record<ThemeId, AppTheme> = {
   default: defaultTheme,
   valorant: valorantTheme,
+  fifa: fifaTheme,
 };
 
 export function getThemeById(themeId: ThemeId | string | undefined | null): AppTheme {

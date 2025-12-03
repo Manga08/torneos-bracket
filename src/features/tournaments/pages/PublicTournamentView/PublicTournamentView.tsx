@@ -131,7 +131,7 @@ export const PublicTournamentView = () => {
               {tournament.game.toUpperCase()}
             </div>
             <h1
-              className={`text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight drop-shadow-lg font-display ${themeId === 'valorant' ? 'valorant-text-shadow' : ''}`}
+              className={`text-4xl md:text-6xl font-bold text-white mb-6 tracking-tight drop-shadow-lg font-display ${themeId === 'valorant' ? 'valorant-text-shadow' : ''} ${themeId === 'fifa' ? 'fifa-text-glow' : ''}`}
             >
               {tournament.name}
             </h1>
