@@ -279,18 +279,104 @@ La calidad es innegociable. Tenemos tres niveles de tests:
 
 ## 🧩 Cómo Extender el Proyecto
 
-### Crear una nueva Feature
+### 📦 Crear una nueva Feature
 
-1.  Crea `src/features/mi-feature`.
-2.  Estructura interna: `api`, `components`, `hooks`, `pages`.
-3.  Registra las rutas en `src/app/router/AppRouter.tsx`.
+Para mantener la arquitectura modular y escalable, sigue estos pasos al añadir una nueva funcionalidad (ej: `ranking`):
 
-### Agregar un Nuevo Tema
+1.  **Crear Estructura de Carpetas**:
+    Crea el directorio `src/features/ranking` con la siguiente estructura interna:
 
-1.  Crea la configuración en `src/features/themes/config/miTema.ts`.
-2.  Define la paleta de colores y tipografía.
-3.  Registra el tema en `themeRegistry.ts`.
-4.  Añade los estilos CSS específicos en `src/index.css` bajo la clase `.theme-miTema`.
+    ```
+    src/features/ranking/
+    ├── api/          # Servicios de Supabase (rankingApi.ts)
+    ├── components/   # Componentes UI específicos (RankingTable.tsx)
+    ├── hooks/        # Lógica de negocio y estado (useRanking.ts)
+    ├── pages/        # Vistas completas (RankingPage.tsx)
+    ├── types/        # Definiciones TypeScript locales
+    └── index.ts      # Barril de exportaciones (opcional)
+    ```
+
+2.  **Implementar Lógica (API & Hooks)**:
+    - Define tus tipos en `types/index.ts`.
+    - Crea las funciones de fetch en `api/rankingApi.ts` usando el cliente singleton `@/shared/api/supabaseClient`.
+    - Crea un hook `useRanking` en `hooks/` que consuma la API y gestione estados de carga/error.
+
+3.  **Desarrollar UI (Components & Pages)**:
+    - Crea componentes pequeños en `components/`.
+    - Compón la vista final en `pages/RankingPage.tsx`.
+
+4.  **Registrar la Ruta**:
+    Abre `src/app/router/AppRouter.tsx` y añade la nueva ruta:
+
+    ```tsx
+    // Importación (Lazy loading recomendado)
+    const RankingPage = lazy(() => import('@/features/ranking/pages/RankingPage'));
+
+    // En el router
+    <Route
+      path="/ranking"
+      element={
+        <ProtectedRoute>
+          <RankingPage />
+        </ProtectedRoute>
+      }
+    />;
+    ```
+
+### 🎨 Agregar un Nuevo Tema
+
+El sistema de temas es flexible y permite cambiar radicalmente la apariencia. Supongamos que creamos el tema `cyberpunk`.
+
+1.  **Crear Configuración del Tema**:
+    Crea el archivo `src/features/themes/config/cyberpunkTheme.ts`:
+
+    ```typescript
+    import type { AppTheme } from '../types/themeTypes';
+
+    export const cyberpunkTheme: AppTheme = {
+      id: 'cyberpunk',
+      name: 'Cyberpunk 2077',
+      description: 'Neon, glitches y futuro distópico.',
+      previewColor: '#FCEE0A', // Color representativo para el selector
+      previewGradient: 'linear-gradient(135deg, #000 0%, #FCEE0A 100%)',
+      palette: {
+        background: '#000000',
+        surface: '#1a1a1a',
+        accent: '#FCEE0A', // Amarillo neón
+        // ... resto de la paleta
+      },
+      // ... tipografía y formas
+    };
+    ```
+
+2.  **Registrar el Tema**:
+    Edita `src/features/themes/config/themeRegistry.ts`:
+    - Importa tu configuración.
+    - Añade `'cyberpunk'` al tipo `ThemeId`.
+    - Agrega el objeto `cyberpunkTheme` al array `AVAILABLE_THEMES`.
+
+3.  **Definir Estilos CSS**:
+    En `src/index.css`, crea el bloque para tu tema. Aquí es donde ocurre la magia de las variables CSS:
+    ```css
+    .theme-cyberpunk {
+      /* Variables Base (Sobrescriben los defaults) */
+      --color-background: #000000;
+      --color-surface: #121212;
+      --color-primary: #fcee0a; /* Amarillo Cyberpunk */
+      --color-text-main: #ffffff;
+
+      /* Fuentes personalizadas */
+      --font-display: 'Orbitron', sans-serif;
+
+      /* Estilos específicos para componentes */
+      .btn-primary {
+        clip-path: polygon(10% 0, 100% 0, 100% 90%, 90% 100%, 0 100%, 0 10%);
+        text-transform: uppercase;
+        font-weight: 900;
+      }
+    }
+    ```
+    _Nota: Asegúrate de importar cualquier fuente nueva al inicio de `index.css`._
 
 ---
 
