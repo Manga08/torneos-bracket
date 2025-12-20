@@ -87,7 +87,14 @@ export const CreateTournament = () => {
       // eslint-disable-next-line no-console
       console.error('Error creating tournament:', error);
       const message = error instanceof Error ? error.message : 'Error al crear el torneo';
-      toast.error(message);
+
+      if (message.includes('invalid input value for enum tournament_format')) {
+        toast.error(
+          'Tu BD aún no soporta formato Liga. Ejecuta el SQL docs/sql/league_migration.sql',
+        );
+      } else {
+        toast.error(message);
+      }
     } finally {
       setLoading(false);
     }
@@ -97,7 +104,7 @@ export const CreateTournament = () => {
     <div className="max-w-2xl mx-auto">
       <AppButton
         onClick={() => navigate('/admin/dashboard')}
-        variant={formData.theme === 'valorant' ? 'secondary' : 'ghost'}
+        variant="ghost"
         theme={formData.theme}
         leftIcon={<ArrowLeft size={20} />}
         className="mb-6"
@@ -169,6 +176,7 @@ export const CreateTournament = () => {
                 <option value="double_elim">Doble Eliminación</option>
                 <option value="swiss">Suizo</option>
                 <option value="groups">Fase de Grupos + Playoffs</option>
+                <option value="league">Liga (Round Robin)</option>
               </select>
             </div>
           </div>
@@ -199,6 +207,14 @@ export const CreateTournament = () => {
                 </span>
                 Genera automáticamente un partido entre los perdedores de las semifinales.
               </label>
+            </div>
+          )}
+
+          {/* League Warning */}
+          {formData.format === 'league' && (
+            <div className="p-4 bg-blue-500/10 border border-blue-500/20 rounded-lg text-sm text-blue-200">
+              <p className="font-bold mb-1">Formato Liga:</p>
+              <p>Todos juegan contra todos. El ganador se decide por puntos.</p>
             </div>
           )}
 

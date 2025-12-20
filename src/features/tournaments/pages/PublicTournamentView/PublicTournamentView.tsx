@@ -7,9 +7,10 @@ import { useTournamentTheme } from '@/features/themes/hooks/useTournamentTheme';
 import { AppButton } from '@/shared/components/ui/AppButton';
 
 import { BracketView } from '../../components/bracket/BracketView';
+import { LeagueView } from '../../components/league/LeagueView';
 import { MatchListView } from '../../components/matches/MatchListView';
 import { usePublicTournament } from '../../hooks/usePublicTournament';
-import type { TournamentConfig } from '../../types';
+import type { LeagueConfig, TournamentConfig } from '../../types';
 
 export const PublicTournamentView = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -43,6 +44,23 @@ export const PublicTournamentView = () => {
     document.addEventListener('fullscreenchange', handleFullscreenChange);
     return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
   }, []);
+
+  useEffect(() => {
+    if (!tournament) return;
+    let format = tournament.format;
+    try {
+      const config =
+        typeof tournament.config === 'string' ? JSON.parse(tournament.config) : tournament.config;
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      if ((config as any)?.original_format) format = (config as any).original_format;
+    } catch {
+      // ignore
+    }
+
+    if (format === 'league') {
+      setViewMode('list');
+    }
+  }, [tournament]);
 
   if (loading)
     return (
@@ -82,15 +100,17 @@ export const PublicTournamentView = () => {
           <div
             className={`flex p-1 gap-1 ${themeId === 'valorant' ? '' : 'bg-white/5 rounded-lg border border-white/10'}`}
           >
-            <AppButton
-              onClick={() => setViewMode('bracket')}
-              variant={viewMode === 'bracket' ? 'primary' : 'ghost'}
-              theme={themeId}
-              className="px-3"
-              title="Vista de Bracket"
-            >
-              <GitBranch size={16} />
-            </AppButton>
+            {tournamentFormat !== 'league' && (
+              <AppButton
+                onClick={() => setViewMode('bracket')}
+                variant={viewMode === 'bracket' ? 'primary' : 'ghost'}
+                theme={themeId}
+                className="px-3"
+                title="Vista de Bracket"
+              >
+                <GitBranch size={16} />
+              </AppButton>
+            )}
             <AppButton
               onClick={() => setViewMode('list')}
               variant={viewMode === 'list' ? 'primary' : 'ghost'}
@@ -160,6 +180,19 @@ export const PublicTournamentView = () => {
               format={tournamentFormat}
               hasThirdPlace={!!(tournament.config as unknown as TournamentConfig)?.has_third_place}
               onMatchClick={() => {}} // Read only
+            />
+          ) : tournamentFormat === 'league' ? (
+            <LeagueView
+              matches={matches}
+              participants={participants}
+              config={
+                (
+                  (typeof tournament.config === 'string'
+                    ? JSON.parse(tournament.config)
+                    : tournament.config) as TournamentConfig
+                )?.league as LeagueConfig
+              }
+              status={tournament.status}
             />
           ) : (
             <MatchListView matches={matches} participants={participants} />

@@ -4,7 +4,8 @@ export interface Participant {
   tournament_id: string;
   name: string;
   seed?: number;
-  meta?: Record<string, unknown>;
+  metadata?: Record<string, unknown>;
+  updated_at?: string | null;
 }
 
 export interface Match {
@@ -24,6 +25,7 @@ export interface Match {
   loser_next_match_id?: string | null;
   loser_match_id?: string | null;
   group_id?: string | null;
+  metadata?: Record<string, unknown> | null;
 }
 
 export interface Tournament {
@@ -33,13 +35,14 @@ export interface Tournament {
   description?: string | null;
   status: 'draft' | 'active' | 'completed';
   format:
-    | 'single_elim'
-    | 'double_elim'
-    | 'swiss'
-    | 'groups'
-    | 'round_robin'
-    | 'single_elimination'
-    | 'double_elimination';
+  | 'single_elim'
+  | 'double_elim'
+  | 'swiss'
+  | 'groups'
+  | 'round_robin'
+  | 'single_elimination'
+  | 'double_elimination'
+  | 'league';
   user_id: string;
   created_by: string;
   config: Record<string, unknown>;

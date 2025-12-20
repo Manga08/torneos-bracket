@@ -470,7 +470,7 @@ export const generateGroupStageMatches = (
     name: `Winner/Runner-up Group ${String.fromCharCode(65 + Math.floor(i / 2))}`,
     seed: i + 1,
     created_at: new Date().toISOString(),
-    meta: {},
+    metadata: {},
   }));
 
   const playoffMatches = generateSingleEliminationMatches(tournamentId, playoffParticipants);
@@ -481,4 +481,122 @@ export const generateGroupStageMatches = (
   });
 
   return [...matches, ...playoffMatches];
+};
+
+export const generateRoundRobinMatches = (
+  tournamentId: string,
+  participants: Participant[],
+  options?: { doubleRoundRobin?: boolean; stage?: string },
+): BracketMatch[] => {
+  const matches: BracketMatch[] = [];
+  const generateUUID = () => crypto.randomUUID();
+  const now = new Date().toISOString();
+  const stage = options?.stage ?? 'league';
+
+  // 1. Sort participants by seed (deterministic)
+  // Fallback to created_at or name if seed is missing, to ensure determinism
+  const sortedParticipants = [...participants].sort((a, b) => {
+    // Treat null seed as Infinity so they go to the bottom
+    const seedA = a.seed !== null && a.seed !== undefined ? a.seed : Number.MAX_SAFE_INTEGER;
+    const seedB = b.seed !== null && b.seed !== undefined ? b.seed : Number.MAX_SAFE_INTEGER;
+
+    if (seedA !== seedB) {
+      return seedA - seedB;
+    }
+
+    if (a.created_at && b.created_at && a.created_at !== b.created_at) {
+      return a.created_at.localeCompare(b.created_at);
+    }
+    return a.name.localeCompare(b.name);
+  });
+
+  // 2. Handle odd number of participants (Circle Method)
+  // If odd, add a dummy "BYE" participant.
+  const n = sortedParticipants.length;
+  const hasBye = n % 2 !== 0;
+  const workingParticipants = hasBye
+    ? [...sortedParticipants, { id: 'BYE' } as Participant]
+    : [...sortedParticipants];
+
+  const totalTeams = workingParticipants.length; // Always even now
+  const roundsPerCycle = totalTeams - 1;
+  const matchesPerRound = totalTeams / 2;
+
+  // 3. Generate Rounds (Circle Method)
+  // We fix the first team and rotate the rest.
+  // Indices: 0, 1, 2, 3, ... totalTeams-1
+  // Fixed: index 0.
+  // Rotating: 1 to totalTeams-1.
+
+  const generateCycle = (isSecondLeg: boolean) => {
+    const cycleMatches: BracketMatch[] = [];
+    // We need to clone the array to rotate it without affecting the original if we were to reuse it,
+    // but here we just calculate indices dynamically or rotate a local array.
+    // Let's use a local array of indices to rotate.
+    let roundIndices = workingParticipants.map((_, i) => i);
+
+    for (let round = 0; round < roundsPerCycle; round++) {
+      const roundNum = isSecondLeg ? round + 1 + roundsPerCycle : round + 1;
+
+      for (let i = 0; i < matchesPerRound; i++) {
+        const homeIdx = roundIndices[i];
+        const awayIdx = roundIndices[totalTeams - 1 - i];
+
+        const home = workingParticipants[homeIdx];
+        const away = workingParticipants[awayIdx];
+
+        // Skip BYE matches
+        if (home.id === 'BYE' || away.id === 'BYE') {
+          continue;
+        }
+
+        const matchId = generateUUID();
+        const match: BracketMatch = {
+          id: matchId,
+          created_at: now,
+          tournament_id: tournamentId,
+          round_number: roundNum,
+          match_number: cycleMatches.length + 1, // Global match number in this generation batch? Or per round?
+          // Usually match_number is per round or global. The other generators use per-round index + 1.
+          // Let's stick to per-round index + 1 for consistency with other generators in this file.
+          // Wait, other generators use `i + 1` inside the loop.
+          // Here `i` is the match index within the round.
+          stage: stage,
+          participant_a_id: isSecondLeg ? away.id : home.id,
+          participant_b_id: isSecondLeg ? home.id : away.id,
+          score_a: 0,
+          score_b: 0,
+          winner_id: null,
+          status: 'pending',
+          next_match_id: null,
+        };
+        // Override match_number to be i + 1
+        match.match_number = i + 1;
+
+        cycleMatches.push(match);
+      }
+
+      // Rotate indices for next round
+      // Keep index 0 fixed.
+      // Move last element to position 1.
+      // Shift everything else (1..last-1) to the right.
+      // [0, 1, 2, 3] -> [0, 3, 1, 2]
+      const fixed = roundIndices[0];
+      const rotating = roundIndices.slice(1);
+      const last = rotating.pop();
+      if (last !== undefined) {
+        rotating.unshift(last);
+      }
+      roundIndices = [fixed, ...rotating];
+    }
+    return cycleMatches;
+  };
+
+  matches.push(...generateCycle(false));
+
+  if (options?.doubleRoundRobin) {
+    matches.push(...generateCycle(true));
+  }
+
+  return matches;
 };

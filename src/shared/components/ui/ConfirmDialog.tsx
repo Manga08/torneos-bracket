@@ -1,6 +1,8 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { AlertTriangle, X } from 'lucide-react';
 
+import type { ThemeId } from '@/features/themes/types/themeTypes';
+
 import { AppButton } from './AppButton';
 
 interface ConfirmDialogProps {
@@ -12,6 +14,7 @@ interface ConfirmDialogProps {
   confirmText?: string;
   cancelText?: string;
   isDestructive?: boolean;
+  theme?: ThemeId;
 }
 
 export const ConfirmDialog = ({
@@ -23,9 +26,8 @@ export const ConfirmDialog = ({
   confirmText = 'Confirmar',
   cancelText = 'Cancelar',
   isDestructive = false,
+  theme,
 }: ConfirmDialogProps) => {
-  const isValorant = document.body.classList.contains('theme-valorant');
-
   return (
     <AnimatePresence>
       {isOpen && (
@@ -71,12 +73,7 @@ export const ConfirmDialog = ({
               <p className="text-text-muted mb-6 leading-relaxed">{message}</p>
 
               <div className="flex justify-end gap-3">
-                <AppButton
-                  onClick={onClose}
-                  variant="ghost"
-                  size="sm"
-                  theme={isValorant ? 'valorant' : undefined}
-                >
+                <AppButton onClick={onClose} variant="ghost" size="sm" theme={theme}>
                   {cancelText}
                 </AppButton>
                 <AppButton
@@ -86,7 +83,7 @@ export const ConfirmDialog = ({
                   }}
                   variant={isDestructive ? 'danger' : 'primary'}
                   size="sm"
-                  theme={isValorant ? 'valorant' : undefined}
+                  theme={theme}
                 >
                   {confirmText}
                 </AppButton>

@@ -1,6 +1,6 @@
 import { motion, AnimatePresence } from 'framer-motion';
 import { toPng } from 'html-to-image';
-import { List, LayoutGrid, Trophy, Image as ImageIcon } from 'lucide-react';
+import { List, LayoutGrid, Trophy, Image as ImageIcon, RefreshCw, RotateCcw } from 'lucide-react';
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Toaster, toast } from 'sonner';
@@ -12,6 +12,13 @@ import { AppButton } from '@/shared/components/ui/AppButton';
 import { ConfirmDialog } from '@/shared/components/ui/ConfirmDialog';
 import { useAuthStore } from '@/shared/store/authStore';
 
+import {
+  createOrRegenerateLeagueSchedule,
+  finalizeLeagueTournament,
+  reopenLeagueTournament,
+  restartLeagueTournament,
+} from '../../api/league.api';
+import { RestartTournamentDialog } from '../../components/league/RestartTournamentDialog';
 import {
   fetchTournamentById,
   fetchTournamentParticipants,
@@ -35,12 +42,19 @@ import {
 } from '../../api/tournamentsApi';
 import { BracketView } from '../../components/bracket/BracketView';
 import { TournamentAdminHeader } from '../../components/common/TournamentAdminHeader';
+import { LeagueView } from '../../components/league/LeagueView';
 import { MatchListView } from '../../components/matches/MatchListView';
 import { MatchResultModal } from '../../components/matches/MatchResultModal';
 import { TournamentSettingsSection } from '../../components/settings/TournamentSettingsSection';
 import { TournamentSetupSection } from '../../components/settings/TournamentSetupSection';
 import { useTournamentPermissions } from '../../hooks/useTournamentPermissions';
-import type { TournamentRow, ParticipantRow, MatchRow, TournamentConfig } from '../../types';
+import type {
+  TournamentRow,
+  ParticipantRow,
+  MatchRow,
+  TournamentConfig,
+  LeagueConfig,
+} from '../../types';
 import {
   generateSingleEliminationMatches,
   generateDoubleEliminationMatches,
@@ -106,6 +120,63 @@ export const TournamentDetail = () => {
   });
   useBodyTheme(themeId);
 
+  const handleRegenerateLeague = async () => {
+    if (!id) return;
+
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Regenerar Calendario',
+      message:
+        '¿Estás seguro? Se borrarán todos los partidos y resultados actuales y se generará un nuevo calendario de liga. Esta acción no se puede deshacer.',
+      isDestructive: true,
+      onConfirm: async () => {
+        try {
+          await createOrRegenerateLeagueSchedule({
+            tournamentId: id!,
+            regenerate: true,
+          });
+
+          toast.success('Calendario regenerado correctamente');
+
+          // Refresh matches
+          const { data } = await fetchTournamentMatches(id!);
+          if (data) setMatches(data);
+          setBracketRefreshKey((prev) => prev + 1);
+        } catch (e) {
+          // eslint-disable-next-line no-console
+          console.error(e);
+          toast.error('Error al regenerar el calendario');
+        }
+      },
+    });
+  };
+
+  const handleRestartLeague = async (regenerateSchedule: boolean) => {
+    if (!id) return;
+
+    setIsRestarting(true);
+    try {
+      await restartLeagueTournament(id, { regenerateSchedule });
+      toast.success(
+        regenerateSchedule
+          ? 'Torneo reiniciado y calendario regenerado'
+          : 'Torneo reiniciado correctamente',
+      );
+
+      // Refresh matches
+      const { data } = await fetchTournamentMatches(id);
+      if (data) setMatches(data);
+      setBracketRefreshKey((prev) => prev + 1);
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+      toast.error('Error al reiniciar el torneo');
+    } finally {
+      setIsRestarting(false);
+      setIsRestartDialogOpen(false);
+    }
+  };
+
   const handleUndo = async () => {
     if (undoStack.length === 0) return;
     const action = undoStack[undoStack.length - 1];
@@ -147,12 +218,19 @@ export const TournamentDetail = () => {
   useEffect(() => {
     if (tournament?.status === 'active' || tournament?.status === 'completed') {
       setActiveTab('bracket');
+      if (tournament.format === 'league') {
+        setViewMode('list');
+      }
     }
-  }, [tournament?.status]);
+  }, [tournament?.status, tournament?.format]);
 
-  // Fetch matches for List View
+  // Fetch matches for List View AND League Setup
   useEffect(() => {
-    if (tournament?.status === 'active' || tournament?.status === 'completed') {
+    if (
+      tournament?.status === 'active' ||
+      tournament?.status === 'completed' ||
+      (tournament?.status === 'draft' && tournament.format === 'league')
+    ) {
       const fetchMatches = async () => {
         const { data } = await fetchTournamentMatches(id!);
 
@@ -167,7 +245,7 @@ export const TournamentDetail = () => {
         unsubscribe();
       };
     }
-  }, [tournament?.status, id]);
+  }, [tournament?.status, id, tournament?.format]);
 
   // Estado para diálogos de confirmación
   const [confirmDialog, setConfirmDialog] = useState<{
@@ -182,6 +260,10 @@ export const TournamentDetail = () => {
     message: '',
     onConfirm: () => {},
   });
+
+  // Estado para diálogo de reiniciar liga
+  const [isRestartDialogOpen, setIsRestartDialogOpen] = useState(false);
+  const [isRestarting, setIsRestarting] = useState(false);
 
   const fetchTournamentData = useCallback(async () => {
     try {
@@ -338,6 +420,52 @@ export const TournamentDetail = () => {
       toast.error('Error al exportar imagen');
     }
   }, [bracketRef, tournament]);
+
+  const handleFinalizeLeague = async () => {
+    if (!id) return;
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Finalizar Liga',
+      message:
+        '¿Estás seguro de que quieres finalizar la liga? Esto generará el podio y congelará los resultados. Podrás reabrirla después si es necesario.',
+      onConfirm: async () => {
+        try {
+          const updatedTournament = await finalizeLeagueTournament(id);
+          if (updatedTournament) {
+            setTournament(updatedTournament);
+          }
+          toast.success('Liga finalizada correctamente');
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(error);
+          toast.error('Error al finalizar la liga');
+        }
+      },
+    });
+  };
+
+  const handleReopenLeague = async () => {
+    if (!id) return;
+    setConfirmDialog({
+      isOpen: true,
+      title: 'Reabrir Liga',
+      message:
+        '¿Estás seguro de que quieres reabrir la liga? Esto eliminará el podio y permitirá editar los partidos nuevamente.',
+      onConfirm: async () => {
+        try {
+          const updatedTournament = await reopenLeagueTournament(id);
+          if (updatedTournament) {
+            setTournament(updatedTournament);
+          }
+          toast.success('Liga reabierta correctamente');
+        } catch (error) {
+          // eslint-disable-next-line no-console
+          console.error(error);
+          toast.error('Error al reabrir la liga');
+        }
+      },
+    });
+  };
 
   const handleAddParticipant = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
@@ -590,24 +718,27 @@ export const TournamentDetail = () => {
           // eslint-disable-next-line no-console
           console.log('Generating matches for format:', format);
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          let matches: any[] = [];
+          let matches: Partial<MatchRow>[] = [];
 
-          if (format === 'groups') {
-            matches = generateGroupStageMatches(id, participants);
-          } else if (format === 'double_elim') {
-            matches = generateDoubleEliminationMatches(id, participants);
-          } else if (format === 'swiss') {
-            matches = generateSwissMatches(id, participants);
+          if (format === 'league') {
+            await createOrRegenerateLeagueSchedule({ tournamentId: id! });
           } else {
-            const hasThirdPlace = (configObj as TournamentConfig)?.has_third_place || false;
-            matches = generateSingleEliminationMatches(id, participants, hasThirdPlace);
+            if (format === 'groups') {
+              matches = generateGroupStageMatches(id, participants);
+            } else if (format === 'double_elim') {
+              matches = generateDoubleEliminationMatches(id, participants);
+            } else if (format === 'swiss') {
+              matches = generateSwissMatches(id, participants);
+            } else {
+              const hasThirdPlace = (configObj as TournamentConfig)?.has_third_place || false;
+              matches = generateSingleEliminationMatches(id, participants, hasThirdPlace);
+            }
+
+            // 2. Insertar partidos en la base de datos
+            const { error: matchesError } = await insertMatches(matches);
+
+            if (matchesError) throw matchesError;
           }
-
-          // 2. Insertar partidos en la base de datos
-          const { error: matchesError } = await insertMatches(matches);
-
-          if (matchesError) throw matchesError;
 
           // 3. Actualizar estado del torneo
           // 3. Actualizar estado del torneo
@@ -714,6 +845,7 @@ export const TournamentDetail = () => {
     scoreA: number,
     scoreB: number,
     winnerId: string | null,
+    metadata?: Record<string, unknown>,
   ) => {
     try {
       // Capture state for Undo
@@ -731,12 +863,36 @@ export const TournamentDetail = () => {
         }
       }
 
+      // Prepare metadata update
+      let newMetadata = currentMatch?.metadata;
+      if (metadata) {
+        const currentMeta = (currentMatch?.metadata as Record<string, unknown>) || {};
+        const currentLeague = (currentMeta.league as Record<string, unknown>) || {};
+        const currentMetrics = (currentLeague.metrics as Record<string, unknown>) || {};
+
+        const newLeague = (metadata.league as Record<string, unknown>) || {};
+        const newMetrics = (newLeague.metrics as Record<string, unknown>) || {};
+
+        newMetadata = {
+          ...currentMeta,
+          league: {
+            ...currentLeague,
+            ...newLeague,
+            metrics: {
+              ...currentMetrics,
+              ...newMetrics,
+            },
+          },
+        };
+      }
+
       // 1. Update current match
       const { error } = await updateMatch(matchId, {
         score_a: scoreA,
         score_b: scoreB,
         winner_id: winnerId,
         status: 'completed',
+        metadata: newMetadata,
       });
 
       if (error) throw error;
@@ -935,7 +1091,7 @@ export const TournamentDetail = () => {
           // Group participants by group
           const groups: Record<string, ParticipantRow[]> = {};
           participants.forEach((p) => {
-            const group = (p.meta as Record<string, unknown>)?.group || 'A';
+            const group = (p.metadata as Record<string, unknown>)?.group || 'A';
             if (!groups[group as string]) groups[group as string] = [];
             groups[group as string].push(p);
           });
@@ -1096,9 +1252,7 @@ export const TournamentDetail = () => {
   }
 
   return (
-    <div
-      className={`animate-fade-in ${themeId === 'fifa' ? 'fifa-pitch-bg fifa-triangles min-h-screen' : ''}`}
-    >
+    <div className="animate-fade-in min-h-screen">
       <Toaster position="top-right" theme="dark" />
       <ConfirmDialog
         isOpen={confirmDialog.isOpen}
@@ -1107,6 +1261,16 @@ export const TournamentDetail = () => {
         title={confirmDialog.title}
         message={confirmDialog.message}
         isDestructive={confirmDialog.isDestructive}
+        theme={themeId}
+      />
+
+      {/* Restart League Dialog */}
+      <RestartTournamentDialog
+        isOpen={isRestartDialogOpen}
+        onClose={() => setIsRestartDialogOpen(false)}
+        onConfirm={handleRestartLeague}
+        isLoading={isRestarting}
+        theme={themeId}
       />
 
       <TournamentAdminHeader
@@ -1120,7 +1284,9 @@ export const TournamentDetail = () => {
               ? 'Doble Eliminación'
               : tournamentFormat === 'swiss'
                 ? 'Suizo'
-                : 'Eliminación Simple'
+                : tournamentFormat === 'league'
+                  ? 'Liga (Round Robin)'
+                  : 'Eliminación Simple'
         }
         participantsCount={participants.length}
         maxParticipants={
@@ -1169,6 +1335,7 @@ export const TournamentDetail = () => {
             <TournamentSetupSection
               tournament={tournament}
               participants={participants}
+              matches={matches}
               themeId={themeId}
               newParticipantName={newParticipantName}
               addingParticipant={addingParticipant}
@@ -1190,6 +1357,10 @@ export const TournamentDetail = () => {
               onParticipantMove={handleParticipantMove}
               onDeleteParticipant={handleDeleteParticipant}
               canEdit={canEdit}
+              onMatchUpdate={async () => {
+                const { data } = await fetchTournamentMatches(id!);
+                if (data) setMatches(data);
+              }}
             />
           )}
 
@@ -1224,18 +1395,18 @@ export const TournamentDetail = () => {
 
                     <div className="flex items-center gap-3 w-full md:w-auto justify-end">
                       {/* View Toggle */}
-                      <div
-                        className={`flex p-1 gap-1 ${themeId === 'valorant' ? '' : 'bg-surface-dark rounded-lg border border-border'}`}
-                      >
-                        <AppButton
-                          onClick={() => setViewMode('bracket')}
-                          variant={viewMode === 'bracket' ? 'primary' : 'ghost'}
-                          theme={themeId}
-                          className="px-3"
-                          title="Vista de Bracket"
-                        >
-                          <LayoutGrid size={18} />
-                        </AppButton>
+                      <div className="flex p-1 gap-1 view-toggle-container">
+                        {tournamentFormat !== 'league' && (
+                          <AppButton
+                            onClick={() => setViewMode('bracket')}
+                            variant={viewMode === 'bracket' ? 'primary' : 'ghost'}
+                            theme={themeId}
+                            className="px-3"
+                            title="Vista de Bracket"
+                          >
+                            <LayoutGrid size={18} />
+                          </AppButton>
+                        )}
                         <AppButton
                           onClick={() => setViewMode('list')}
                           variant={viewMode === 'list' ? 'primary' : 'ghost'}
@@ -1246,6 +1417,60 @@ export const TournamentDetail = () => {
                           <List size={18} />
                         </AppButton>
                       </div>
+
+                      {/* League Actions */}
+                      {tournamentFormat === 'league' && (
+                        <>
+                          {/* Setup mode: Regenerar calendario */}
+                          {tournament.status === 'draft' && (
+                            <AppButton
+                              onClick={handleRegenerateLeague}
+                              variant="primary"
+                              theme={themeId}
+                              leftIcon={<RefreshCw size={18} />}
+                              title="Regenerar Calendario"
+                            >
+                              <span className="hidden sm:inline">Regenerar Calendario</span>
+                            </AppButton>
+                          )}
+
+                          {/* Runtime mode: Reiniciar torneo */}
+                          {tournament.status === 'active' && (
+                            <>
+                              <AppButton
+                                onClick={() => setIsRestartDialogOpen(true)}
+                                variant="primary"
+                                theme={themeId}
+                                leftIcon={<RotateCcw size={18} />}
+                                title="Reiniciar Torneo"
+                                className="bg-amber-600 hover:bg-amber-500"
+                              >
+                                <span className="hidden sm:inline">Reiniciar Torneo</span>
+                              </AppButton>
+                              <AppButton
+                                onClick={handleFinalizeLeague}
+                                variant="primary"
+                                theme={themeId}
+                                leftIcon={<Trophy size={18} />}
+                                title="Finalizar Liga"
+                              >
+                                <span className="hidden sm:inline">Finalizar</span>
+                              </AppButton>
+                            </>
+                          )}
+                          {tournament.status === 'completed' && (
+                            <AppButton
+                              onClick={handleReopenLeague}
+                              variant="ghost"
+                              theme={themeId}
+                              leftIcon={<RefreshCw size={18} />}
+                              title="Reabrir Liga"
+                            >
+                              <span className="hidden sm:inline">Reabrir</span>
+                            </AppButton>
+                          )}
+                        </>
+                      )}
 
                       {/* Advance to Playoffs Button (Hybrid Format) */}
                       {tournament.format === 'groups' &&
@@ -1265,7 +1490,7 @@ export const TournamentDetail = () => {
 
                       <AppButton
                         onClick={handleExportImage}
-                        variant={themeId === 'valorant' ? 'secondary' : 'ghost'}
+                        variant="ghost"
                         theme={themeId}
                         leftIcon={<ImageIcon size={18} />}
                         title="Descargar imagen del bracket"
@@ -1292,12 +1517,35 @@ export const TournamentDetail = () => {
                       />
                     </div>
                   ) : (
-                    <div className="bg-surface-dark p-6 rounded-xl border border-border shadow-2xl">
-                      <MatchListView
-                        matches={matches}
-                        participants={participants}
-                        onMatchClick={handleMatchClick}
-                      />
+                    <div
+                      ref={bracketRef}
+                      className="bg-surface-dark p-6 rounded-xl border border-border shadow-2xl"
+                    >
+                      {tournamentFormat === 'league' ? (
+                        <LeagueView
+                          matches={matches}
+                          participants={participants}
+                          onMatchClick={handleMatchClick}
+                          canEdit={canEdit}
+                          onMatchUpdate={() => setBracketRefreshKey((prev) => prev + 1)}
+                          tournamentId={id}
+                          config={
+                            (
+                              (typeof tournament.config === 'string'
+                                ? JSON.parse(tournament.config)
+                                : tournament.config) as TournamentConfig
+                            )?.league as LeagueConfig
+                          }
+                          onConfigUpdate={fetchTournamentData}
+                          status={tournament.status}
+                        />
+                      ) : (
+                        <MatchListView
+                          matches={matches}
+                          participants={participants}
+                          onMatchClick={handleMatchClick}
+                        />
+                      )}
                     </div>
                   )}
                 </div>
@@ -1369,6 +1617,17 @@ export const TournamentDetail = () => {
         participantA={participants.find((p) => p.id === selectedMatch?.participant_a_id)}
         participantB={participants.find((p) => p.id === selectedMatch?.participant_b_id)}
         theme={themeId}
+        metricsSchema={
+          tournamentFormat === 'league'
+            ? (
+                (
+                  (typeof tournament.config === 'string'
+                    ? JSON.parse(tournament.config)
+                    : tournament.config) as TournamentConfig
+                )?.league as LeagueConfig
+              )?.metricsSchema
+            : undefined
+        }
         onSave={handleSaveResult}
       />
     </div>

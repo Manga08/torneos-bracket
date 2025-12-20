@@ -7,7 +7,8 @@ export type TournamentFormat =
   | 'groups'
   | 'round_robin'
   | 'single_elimination'
-  | 'double_elimination';
+  | 'double_elimination'
+  | 'league';
 
 export interface TournamentConfig {
   original_format?: string;

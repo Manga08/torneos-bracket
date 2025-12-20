@@ -197,6 +197,20 @@ body {
   --fifa-chip-border: rgba(111, 255, 56, 0.3);
 
   font-family: var(--font-body);
+
+  /* Background Pattern (Pitch) */
+  background-color: var(--color-background);
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(111, 255, 56, 0.15) 0%, transparent 50%),
+    linear-gradient(0deg, rgba(5, 8, 16, 0.9) 0%, rgba(5, 8, 16, 0.6) 100%),
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0px,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 40px
+    );
+  background-attachment: fixed;
 }
 
 /* FIFA Helper Classes */
@@ -386,12 +400,109 @@ body {
   transform: translateY(-1px);
 }
 
+/* FIFA List View */
+.theme-fifa .list-card {
+  background: linear-gradient(145deg, rgba(11, 20, 32, 0.9), rgba(5, 8, 16, 0.95));
+  border: 1px solid rgba(111, 255, 56, 0.2);
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.theme-fifa .list-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 4px;
+  height: 100%;
+  background: var(--color-primary);
+  opacity: 0.7;
+  transition: all 0.3s ease;
+}
+
+.theme-fifa .list-card:hover {
+  transform: translateY(-4px) scale(1.01);
+  box-shadow:
+    0 10px 30px -10px rgba(0, 0, 0, 0.8),
+    0 0 20px rgba(111, 255, 56, 0.15);
+  border-color: var(--color-primary);
+}
+
+.theme-fifa .list-card:hover::before {
+  opacity: 1;
+  box-shadow: 0 0 15px var(--color-primary);
+}
+
+/* Winner Score Effect */
+.theme-fifa .match-score.is-winner {
+  color: #fff;
+  text-shadow: 0 0 10px var(--color-primary);
+  transform: scale(1.1);
+  display: inline-block;
+}
+
+/* Glow Animation */
+@keyframes fifa-pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 15px rgba(111, 255, 56, 0.2);
+  }
+  50% {
+    box-shadow: 0 0 25px rgba(111, 255, 56, 0.5);
+  }
+}
+
+@keyframes fifa-glow-card {
+  0% {
+    box-shadow: 0 0 0 rgba(111, 255, 56, 0);
+  }
+  50% {
+    box-shadow: 0 0 18px rgba(111, 255, 56, 0.45);
+  }
+  100% {
+    box-shadow: 0 0 0 rgba(111, 255, 56, 0);
+  }
+}
+
+.theme-fifa .bracket-node--highlighted {
+  animation: fifa-glow-card 2.2s ease-out infinite;
+}
+
+.theme-fifa .fifa-glow {
+  animation: fifa-pulse 2s infinite;
+}
+
 .theme-fifa .match-score {
   color: var(--color-primary);
   font-family: 'Teko', sans-serif;
   font-size: 1.4em;
   font-weight: 500;
   letter-spacing: 0.02em;
+}
+
+.theme-fifa .match-score.is-winner {
+  color: #6fff38;
+  text-shadow: 0 0 8px rgba(111, 255, 56, 0.6);
+  transition:
+    transform 0.15s ease-out,
+    text-shadow 0.15s ease-out;
+}
+
+.theme-fifa .match-score.is-winner:hover {
+  transform: scale(1.04);
+}
+
+.theme-fifa .app-button.fifa-primary-hover {
+  transition:
+    transform 0.12s ease-out,
+    box-shadow 0.12s ease-out;
+}
+
+.theme-fifa .app-button.fifa-primary-hover:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 0 14px rgba(111, 255, 56, 0.5);
 }
 
 .theme-fifa .modal-content {
@@ -832,13 +943,148 @@ body {
   background-color: #4b5563;
 }
 
+.view-toggle-container {
+  background: rgba(0, 0, 0, 0.3);
+  padding: 4px;
+  border-radius: 8px;
+  display: inline-flex;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* =========================================
+   MATCH SCOREBOARD (Base)
+   ========================================= */
+.match-scoreboard {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  padding: 1rem;
+  border-radius: 1rem;
+  background: rgba(10, 12, 20, 0.9);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 2rem;
+}
+
+@media (min-width: 768px) {
+  .match-scoreboard {
+    padding: 2rem;
+  }
+}
+
+.match-scoreboard__names {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 16px;
+  width: 100%;
+}
+
+.match-scoreboard__name {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  text-wrap: balance;
+  font-size: var(--team-name-size, clamp(14px, 2.2vw, 28px));
+  line-height: 1.2;
+  height: 3.6em; /* Fixed height for 3 lines approx or 2 lines with padding */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  color: rgba(255, 255, 255, 0.9);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.match-scoreboard__scores {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  justify-items: center;
+  width: 100%;
+  gap: 1rem;
+}
+
+.match-scoreboard__center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0 1rem;
+}
+
+.match-scoreboard__vs {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+}
+
+.match-scoreboard__score-input {
+  width: 3.5rem;
+  height: 3.5rem;
+  text-align: center;
+  font-size: 1.75rem;
+  font-weight: 700;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  background: rgba(5, 8, 16, 0.6);
+  color: #ffffff;
+  outline: none;
+  transition: all 0.2s ease;
+}
+
+.match-scoreboard__score-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.2);
+}
+
+/* Winner Highlight (Base) */
+.match-scoreboard__name.is-winner {
+  color: var(--color-primary);
+}
+
+.match-scoreboard__score-input.is-winner {
+  border-color: var(--color-primary);
+  background: rgba(99, 102, 241, 0.1);
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  ::before,
+  ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* =========================================
    MODAL STYLES
    ========================================= */
 
+.match-result-modal {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem 1.75rem;
+  border-radius: 1rem;
+}
+
 /* Default */
 .modal-content {
   @apply bg-surface border border-border rounded-xl shadow-2xl;
+}
+
+.theme-default .match-result-modal--default {
+  background: linear-gradient(145deg, #050816, #050b18);
+  border: 1px solid rgba(255, 255, 255, 0.04);
 }
 
 .modal-header {
@@ -853,6 +1099,44 @@ body {
 .theme-valorant .modal-content {
   @apply bg-black/90 border border-white/10 rounded-none shadow-2xl backdrop-blur-md;
   box-shadow: 0 0 40px rgba(0, 0, 0, 0.8);
+}
+
+.theme-valorant .match-result-modal--valorant {
+  background: radial-gradient(circle at top, #38121f 0%, #130710 60%, #08040a 100%);
+  border: 1px solid rgba(255, 65, 96, 0.4);
+  box-shadow: 0 16px 50px rgba(0, 0, 0, 0.85);
+}
+
+.theme-valorant .match-result-modal--valorant .match-scoreboard {
+  background: rgba(20, 10, 15, 0.8);
+  border: 1px solid rgba(255, 65, 96, 0.2);
+  border-radius: 0;
+}
+
+.theme-valorant .match-result-modal--valorant .match-scoreboard__score-input {
+  border-color: rgba(255, 65, 96, 0.25);
+  border-radius: 0;
+  background: rgba(0, 0, 0, 0.6);
+  font-family: 'Teko', sans-serif;
+  font-size: 2.5rem;
+  height: 4rem;
+  width: 4rem;
+}
+
+.theme-valorant .match-result-modal--valorant .match-scoreboard__score-input:focus {
+  border-color: #ff4160;
+  box-shadow: 0 0 14px rgba(255, 65, 96, 0.6);
+}
+
+.theme-valorant .match-result-modal--valorant .match-scoreboard__name {
+  font-family: 'Teko', sans-serif;
+  font-size: 1.5rem;
+  letter-spacing: 0.08em;
+}
+
+.theme-valorant .match-result-modal--valorant .match-scoreboard__name.is-winner {
+  color: #ff4655;
+  text-shadow: 0 0 10px rgba(255, 70, 85, 0.4);
 }
 
 .theme-valorant .modal-header {
@@ -871,9 +1155,133 @@ body {
     0 0 15px rgba(255, 70, 85, 0.2);
 }
 
-/* =========================================
-   BRACKET VIEW STYLES
-   ========================================= */
+/* FIFA Theme */
+.theme-fifa .modal-content {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 18px;
+}
+
+.theme-fifa .match-result-modal--fifa {
+  background: radial-gradient(circle at top, #061726 0%, #050810 60%, #03070f 100%);
+  border: 1px solid rgba(111, 255, 56, 0.35);
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.9);
+}
+
+.theme-fifa .match-result-modal--fifa .match-result-header {
+  font-family: 'Teko', sans-serif;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  border-bottom: 1px solid rgba(111, 255, 56, 0.35);
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+/* FIFA Scoreboard Overrides (Broadcast HUD) */
+@keyframes fifa-scoreboard-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.match-result-modal--fifa .match-scoreboard {
+  background: linear-gradient(180deg, #050810 0%, #0b1420 100%);
+  border-radius: 0;
+  border: none;
+  border-top: 4px solid #6fff38;
+  border-bottom: 1px solid rgba(111, 255, 56, 0.2);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.8);
+  animation: fifa-scoreboard-enter 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  padding: 2rem 1.5rem;
+  /* gap: 0; Removed to respect base column-gap */
+}
+
+/* Background Pattern */
+.match-result-modal--fifa .match-scoreboard::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image: repeating-linear-gradient(
+    45deg,
+    rgba(255, 255, 255, 0.03) 0px,
+    rgba(255, 255, 255, 0.03) 1px,
+    transparent 1px,
+    transparent 10px
+  );
+  pointer-events: none;
+}
+
+/* Removed .match-scoreboard__side styles as they are no longer used */
+
+.match-result-modal--fifa .match-scoreboard__name {
+  font-family: 'Teko', sans-serif;
+  /* font-size is handled by JS auto-fit, but we can set a different range if needed via props, 
+     but here we just ensure font-family and weight */
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.match-result-modal--fifa .match-scoreboard__score-input {
+  width: 4.5rem;
+  height: 5rem;
+  font-family: 'Teko', sans-serif;
+  font-size: 3.5rem;
+  line-height: 1;
+  border-radius: 4px;
+  border: none;
+  background: linear-gradient(180deg, #1a2c3d 0%, #0f1a24 100%);
+  color: #ffffff;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.match-result-modal--fifa .match-scoreboard__score-input:focus {
+  background: linear-gradient(180deg, #243b52 0%, #162533 100%);
+  box-shadow:
+    inset 0 2px 4px rgba(0, 0, 0, 0.5),
+    0 0 0 2px #6fff38;
+}
+
+.match-result-modal--fifa .match-scoreboard__center {
+  position: relative;
+  z-index: 1;
+}
+
+.match-result-modal--fifa .match-scoreboard__vs {
+  background: #6fff38;
+  color: #050810;
+  padding: 0.25rem 0.5rem;
+  border-radius: 2px;
+  font-weight: 800;
+  font-size: 0.9rem;
+  box-shadow: 0 0 10px rgba(111, 255, 56, 0.4);
+}
+
+/* Winner Highlight (FIFA) */
+.match-result-modal--fifa .match-scoreboard__name.is-winner {
+  color: #6fff38;
+  text-shadow: 0 0 15px rgba(111, 255, 56, 0.4);
+}
+
+.match-result-modal--fifa .match-scoreboard__score-input.is-winner {
+  color: #6fff38;
+  text-shadow: 0 0 10px rgba(111, 255, 56, 0.4);
+  border: 1px solid rgba(111, 255, 56, 0.3);
+}
+
+.theme-fifa .modal-header {
+  background: var(--color-surface-highlight);
+  border-bottom: 1px solid var(--color-border);
+}
 
 /* Default */
 /* Removed semantic classes for BracketView as requested to revert to original design */

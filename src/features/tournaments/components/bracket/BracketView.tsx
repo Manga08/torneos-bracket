@@ -456,7 +456,9 @@ export const BracketView = ({
                               </span>
                             </div>
                             {!isDraft && (
-                              <span className="font-mono font-bold text-white/80">
+                              <span
+                                className={`font-mono font-bold text-white/80 match-score ${match.winner_id === match.participant_a_id && match.winner_id ? 'is-winner' : ''}`}
+                              >
                                 {match.score_a}
                               </span>
                             )}
@@ -519,7 +521,9 @@ export const BracketView = ({
                               </span>
                             </div>
                             {!isDraft && (
-                              <span className="font-mono font-bold text-white/80">
+                              <span
+                                className={`font-mono font-bold text-white/80 match-score ${match.winner_id === match.participant_b_id && match.winner_id ? 'is-winner' : ''}`}
+                              >
                                 {match.score_b}
                               </span>
                             )}

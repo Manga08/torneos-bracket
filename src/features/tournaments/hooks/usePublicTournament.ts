@@ -68,6 +68,10 @@ export const usePublicTournament = (slug?: string) => {
       (payload: any) => {
         setTournament(payload.new as TournamentRow);
       },
+      async () => {
+        const { data } = await fetchPublicTournamentParticipants(tournamentId);
+        if (data) setParticipants(data);
+      },
     );
 
     return () => {

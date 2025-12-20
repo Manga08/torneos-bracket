@@ -4,3 +4,4 @@ export * from './matches.api';
 export * from './realtime.api';
 export * from './public.api';
 export * from './permissions.api';
+export * from './league.api';

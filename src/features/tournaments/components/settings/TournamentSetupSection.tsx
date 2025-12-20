@@ -2,14 +2,16 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Users, Plus, X, Upload, FileText, Trophy, Shuffle } from 'lucide-react';
 
 import { AppButton } from '@/shared/components/ui/AppButton';
-import type { Tournament, Participant } from '@/types/database';
+import type { Tournament, Participant, Match } from '@/types/database';
 
 import { BracketView } from '../../components/bracket/BracketView';
-import type { TournamentConfig } from '../../types';
+import { LeagueView } from '../../components/league/LeagueView';
+import type { TournamentConfig, LeagueConfig } from '../../types';
 
 export interface TournamentSetupSectionProps {
   tournament: Tournament;
   participants: Participant[];
+  matches?: Match[];
   themeId?: string;
 
   // Form states
@@ -35,6 +37,7 @@ export interface TournamentSetupSectionProps {
 
   onUpdateConfig: (config: TournamentConfig) => void;
   onRandomizeSeeds: () => void;
+  onMatchUpdate?: () => void;
 
   // Bracket View Callbacks
   onSlotClick: (seedIndex: number, participant?: Participant) => void;
@@ -48,6 +51,7 @@ export interface TournamentSetupSectionProps {
 export const TournamentSetupSection = ({
   tournament,
   participants,
+  matches,
   themeId,
   newParticipantName,
   addingParticipant,
@@ -65,6 +69,7 @@ export const TournamentSetupSection = ({
   onImportParticipants,
   onUpdateConfig,
   onRandomizeSeeds,
+  onMatchUpdate,
   onSlotClick,
   onParticipantMove,
   onDeleteParticipant,
@@ -244,82 +249,105 @@ export const TournamentSetupSection = ({
 
       {/* Interactive Bracket Preview */}
       <div className="glass-card border-dashed border-border min-h-[300px] relative">
-        <div className="flex flex-col md:flex-row justify-between items-center mb-8 px-4 gap-4">
-          <h3 className="text-lg font-bold text-white flex items-center gap-2">
-            <Trophy size={18} className="text-primary" />
-            Vista Previa del Bracket
-          </h3>
+        {tournamentFormat === 'league' ? (
+          <div className="p-4">
+            <LeagueView
+              matches={matches || []}
+              participants={participants}
+              tournamentId={tournament.id}
+              config={(tournament.config as unknown as TournamentConfig)?.league as LeagueConfig}
+              onConfigUpdate={() =>
+                onUpdateConfig(tournament.config as unknown as TournamentConfig)
+              }
+              status={tournament.status}
+              mode="setup"
+              canEdit={canEdit}
+              onMatchUpdate={onMatchUpdate}
+            />
+          </div>
+        ) : (
+          <>
+            <div className="flex flex-col md:flex-row justify-between items-center mb-8 px-4 gap-4">
+              <h3 className="text-lg font-bold text-white flex items-center gap-2">
+                <Trophy size={18} className="text-primary" />
+                Vista Previa del Bracket
+              </h3>
 
-          <div className="flex flex-wrap items-center gap-6">
-            {/* 3rd Place Toggle for Single Elimination */}
-            {tournamentFormat === 'single_elim' && (
-              <div className="flex items-center gap-3">
-                <div className="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
-                  <input
-                    type="checkbox"
-                    name="has_third_place_preview"
-                    id="has_third_place_preview"
-                    checked={
-                      (tournament.config as unknown as TournamentConfig)?.has_third_place || false
-                    }
-                    onChange={(e) => {
-                      const newConfig = {
-                        ...(typeof tournament.config === 'string'
-                          ? JSON.parse(tournament.config)
-                          : tournament.config),
-                        has_third_place: e.target.checked,
-                      };
-                      onUpdateConfig(newConfig);
-                    }}
-                    className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300"
-                  />
-                  <label
-                    htmlFor="has_third_place_preview"
-                    className="toggle-label block overflow-hidden h-5 rounded-full cursor-pointer transition-colors duration-300"
-                  ></label>
+              <div className="flex flex-wrap items-center gap-6">
+                {/* 3rd Place Toggle for Single Elimination */}
+                {tournamentFormat === 'single_elim' && (
+                  <div className="flex items-center gap-3">
+                    <div className="relative inline-block w-10 align-middle select-none transition duration-200 ease-in">
+                      <input
+                        type="checkbox"
+                        name="has_third_place_preview"
+                        id="has_third_place_preview"
+                        checked={
+                          (tournament.config as unknown as TournamentConfig)?.has_third_place ||
+                          false
+                        }
+                        onChange={(e) => {
+                          const newConfig = {
+                            ...(typeof tournament.config === 'string'
+                              ? JSON.parse(tournament.config)
+                              : tournament.config),
+                            has_third_place: e.target.checked,
+                          };
+                          onUpdateConfig(newConfig);
+                        }}
+                        className="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer transition-all duration-300"
+                      />
+                      <label
+                        htmlFor="has_third_place_preview"
+                        className="toggle-label block overflow-hidden h-5 rounded-full cursor-pointer transition-colors duration-300"
+                      ></label>
+                    </div>
+                    <label
+                      htmlFor="has_third_place_preview"
+                      className="text-sm text-text-muted cursor-pointer select-none hover:text-white transition-colors"
+                    >
+                      Incluir 3er Puesto
+                    </label>
+                  </div>
+                )}
+
+                <div className="h-4 w-px bg-surface-highlight hidden md:block"></div>
+
+                <div className="text-xs text-text-muted flex items-center gap-2">
+                  <span className="w-2 h-2 rounded-full bg-white/20"></span>
+                  <span className="hidden sm:inline">Arrastra para mover</span>
                 </div>
-                <label
-                  htmlFor="has_third_place_preview"
-                  className="text-sm text-text-muted cursor-pointer select-none hover:text-white transition-colors"
-                >
-                  Incluir 3er Puesto
-                </label>
+
+                {canEdit && (
+                  <AppButton
+                    onClick={onRandomizeSeeds}
+                    variant="secondary"
+                    theme={themeId}
+                    size="sm"
+                    leftIcon={<Shuffle size={14} />}
+                  >
+                    <span className="hidden sm:inline">Aleatorizar</span>
+                  </AppButton>
+                )}
               </div>
-            )}
-
-            <div className="h-4 w-px bg-surface-highlight hidden md:block"></div>
-
-            <div className="text-xs text-text-muted flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-white/20"></span>
-              <span className="hidden sm:inline">Arrastra para mover</span>
             </div>
 
-            {canEdit && (
-              <AppButton
-                onClick={onRandomizeSeeds}
-                variant="secondary"
-                theme={themeId}
-                size="sm"
-                leftIcon={<Shuffle size={14} />}
-              >
-                <span className="hidden sm:inline">Aleatorizar</span>
-              </AppButton>
-            )}
-          </div>
-        </div>
-
-        <div className="overflow-hidden pb-4">
-          <BracketView
-            tournamentId={tournament.id}
-            participants={participants}
-            isDraft={true}
-            format={tournamentFormat}
-            hasThirdPlace={!!(tournament.config as unknown as TournamentConfig)?.has_third_place}
-            onSlotClick={onSlotClick}
-            onParticipantMove={onParticipantMove}
-            onDeleteParticipant={onDeleteParticipant}
-          />
-        </div>
+            <div className="overflow-hidden pb-4">
+              <BracketView
+                tournamentId={tournament.id}
+                participants={participants}
+                isDraft={true}
+                format={tournamentFormat}
+                hasThirdPlace={
+                  !!(tournament.config as unknown as TournamentConfig)?.has_third_place
+                }
+                onSlotClick={onSlotClick}
+                onParticipantMove={onParticipantMove}
+                onDeleteParticipant={onDeleteParticipant}
+              />
+            </div>
+          </>
+        )}
 
         {/* Only show slot info if selected for adding */}
         {selectedSlot && !selectedSlot.participant && (

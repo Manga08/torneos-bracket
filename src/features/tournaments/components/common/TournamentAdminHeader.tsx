@@ -41,6 +41,18 @@ export const TournamentAdminHeader = ({
   onChangeTab,
   canEdit = true,
 }: TournamentAdminHeaderProps) => {
+  const getGameBadgeStyle = (gameName: string) => {
+    const lowerGame = gameName.toLowerCase();
+    if (lowerGame.includes('valorant')) {
+      return 'valorant-chip text-[#ff4655]! border-[#ff4655]/30!';
+    }
+    if (lowerGame.includes('fifa') || lowerGame.includes('fc 24') || lowerGame.includes('fc 25')) {
+      return 'fifa-chip text-[#6fff38]! border-[#6fff38]/30!';
+    }
+    // Default theme (Blue)
+    return 'bg-primary/10 text-primary border-primary/20 border';
+  };
+
   return (
     <>
       {/* Header */}
@@ -67,7 +79,7 @@ export const TournamentAdminHeader = ({
                   {name}
                 </h1>
                 <span
-                  className={`px-2 py-0.5 rounded text-xs font-bold uppercase border shadow-sm ${themeId === 'valorant' ? 'valorant-chip' : 'bg-surface-highlight text-text-muted border-border'}`}
+                  className={`px-2 py-0.5 rounded text-xs font-bold uppercase border shadow-sm ${getGameBadgeStyle(game)}`}
                 >
                   {game}
                 </span>

@@ -59,6 +59,7 @@ export function subscribeToPublicTournament(
   onMatchesChange: () => void,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   onTournamentChange: (payload: any) => void,
+  onParticipantsChange?: () => void,
 ) {
   const matchChannel = supabase
     .channel('public_matches')
@@ -83,8 +84,23 @@ export function subscribeToPublicTournament(
     )
     .subscribe();
 
+  const participantsChannel = supabase
+    .channel('public_participants')
+    .on(
+      'postgres_changes',
+      {
+        event: '*',
+        schema: 'public',
+        table: 'participants',
+        filter: `tournament_id=eq.${tournamentId}`,
+      },
+      () => onParticipantsChange?.(),
+    )
+    .subscribe();
+
   return () => {
     supabase.removeChannel(matchChannel);
     supabase.removeChannel(tournamentChannel);
+    supabase.removeChannel(participantsChannel);
   };
 }

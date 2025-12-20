@@ -154,62 +154,83 @@ El tema se aplica inyectando una clase CSS en el `<body>` (`.theme-valorant`, `.
 
 ## 🗄️ Base de Datos (Supabase)
 
-El proyecto utiliza PostgreSQL con Row Level Security (RLS) para máxima seguridad.
+El proyecto utiliza PostgreSQL con Row Level Security (RLS) para máxima seguridad. A continuación se describe el esquema actual de la base de datos.
 
-### Esquema Principal
+### 📋 Esquema de Tablas
 
-- `public.tournaments`: Configuración y estado de los torneos.
-- `public.participants`: Jugadores o equipos inscritos.
-- `public.matches`: Partidos, resultados y relaciones (next_match, loser_match).
-- `public.profiles`: Datos extendidos de usuarios (roles).
-- `public.user_tournament_permissions`: Tabla pivote para colaboradores.
+#### `tournaments`
 
-### Configuración SQL Recomendada
+Almacena la información principal de cada torneo.
 
-Ejecuta este script en el SQL Editor de Supabase para configurar roles y políticas base:
+- `id`: Identificador único (UUID).
+- `name`: Nombre del torneo.
+- `slug`: URL amigable única para compartir.
+- `game`: Juego del torneo (ej: 'valorant', 'fifa'). Define el tema visual por defecto.
+- `format`: Formato de competición ('single_elim', 'double_elim', 'round_robin', 'league').
+- `config`: JSON con configuraciones específicas (tercer puesto, puntos por victoria, etc.).
+- `is_public`: Si es visible para todos o solo para administradores.
+- `created_by`: ID del usuario creador (Owner).
+- `status`: Estado del ciclo de vida ('draft', 'active', 'completed').
+- `created_at` / `updated_at`: Timestamps de auditoría.
 
-```sql
--- 1. ENUM de Roles
-CREATE TYPE public.user_role AS ENUM ('super_admin', 'admin', 'editor', 'viewer');
+#### `participants`
 
--- 2. Tabla de Perfiles (Extensión de auth.users)
-CREATE TABLE IF NOT EXISTS public.profiles (
-  id uuid REFERENCES auth.users(id) ON DELETE CASCADE PRIMARY KEY,
-  email text,
-  display_name text,
-  role public.user_role DEFAULT 'viewer'::public.user_role,
-  created_at timestamptz DEFAULT now()
-);
+Jugadores o equipos inscritos en un torneo.
 
--- 3. Función Helper para Super Admin
-CREATE OR REPLACE FUNCTION public.is_super_admin()
-RETURNS boolean AS $$
-BEGIN
-  RETURN EXISTS (
-    SELECT 1 FROM public.profiles
-    WHERE id = auth.uid() AND role = 'super_admin'::public.user_role
-  );
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+- `id`: Identificador único.
+- `tournament_id`: Torneo al que pertenece.
+- `name`: Nombre del equipo o jugador.
+- `tag`: Etiqueta corta o abreviatura (opcional).
+- `seed`: Número de siembra para el ordenamiento inicial.
+- `metadata`: JSON para datos extra (avatar, estadísticas, info de contacto).
+- `created_at` / `updated_at`: Timestamps.
 
--- 4. Políticas RLS (Ejemplo simplificado para Torneos)
-ALTER TABLE public.tournaments ENABLE ROW LEVEL SECURITY;
+#### `matches`
 
-CREATE POLICY "Ver torneos públicos o propios" ON public.tournaments
-FOR SELECT USING (
-  is_public = true OR
-  auth.uid() = created_by OR
-  public.is_super_admin()
-);
+Representa cada enfrentamiento en el bracket o liga.
 
-CREATE POLICY "Crear torneos" ON public.tournaments
-FOR INSERT WITH CHECK (auth.uid() = created_by);
+- `id`: Identificador único.
+- `tournament_id`: Torneo al que pertenece.
+- `stage_id`: Etapa del torneo (fase de grupos, playoffs, etc.).
+- `round_number`: Número de ronda (1 = Octavos, 2 = Cuartos, etc.).
+- `match_number`: Orden del partido dentro de la ronda.
+- `participant_a_id` / `participant_b_id`: IDs de los participantes enfrentados.
+- `score_a` / `score_b`: Puntuación actual.
+- `winner_id`: ID del participante ganador.
+- `state`: Estado del partido ('pending', 'scheduled', 'in_progress', 'completed').
+- `next_match_id`: ID del siguiente partido al que avanza el ganador.
+- `loser_match_id`: ID del partido al que va el perdedor (para Double Elimination).
+- `metadata`: JSON para detalles específicos (mapas, bans, info de rondas).
+- `status`: Estado general ('pending', 'live', 'completed').
 
-CREATE POLICY "Editar torneos propios" ON public.tournaments
-FOR UPDATE USING (
-  auth.uid() = created_by OR public.is_super_admin()
-);
-```
+#### `stages`
+
+Define las fases de un torneo (ej: "Fase de Grupos", "Playoffs").
+
+- `id`: Identificador único.
+- `tournament_id`: Torneo al que pertenece.
+- `name`: Nombre de la etapa.
+- `type`: Tipo de etapa (ej: 'groups', 'elimination').
+- `order`: Orden secuencial de la etapa.
+
+#### `profiles`
+
+Información extendida de los usuarios autenticados.
+
+- `id`: Vinculado al `auth.users` de Supabase.
+- `email`: Correo electrónico.
+- `display_name`: Nombre visible en la plataforma.
+- `avatar_url`: URL de la imagen de perfil.
+- `role`: Rol global en la plataforma ('super_admin', 'admin', 'editor', 'viewer').
+
+#### `user_tournament_permissions`
+
+Gestiona los colaboradores por torneo.
+
+- `id`: Identificador único.
+- `user_id`: Usuario colaborador.
+- `tournament_id`: Torneo compartido.
+- `can_edit`: Booleano que otorga permisos de edición sobre el torneo.
 
 ---
 

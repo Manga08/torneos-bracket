@@ -45,7 +45,7 @@ export const MatchListView = ({ matches, participants, onMatchClick }: MatchList
                   onClick={() => onMatchClick?.(match)}
                   data-status={match.status}
                   className={`
-                    match-list-item group
+                    match-list-item list-card group
                     ${onMatchClick ? 'cursor-pointer' : ''}
                   `}
                 >

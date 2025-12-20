@@ -2,7 +2,7 @@ import { describe, it, expect } from 'vitest';
 
 import type { Participant } from '@/types/database';
 
-import { generateSingleEliminationMatches } from './bracketUtils';
+import { generateSingleEliminationMatches, generateRoundRobinMatches } from './bracketUtils';
 
 describe('bracketUtils', () => {
   const createParticipants = (count: number): Participant[] => {
@@ -14,6 +14,68 @@ describe('bracketUtils', () => {
       seed: i + 1,
     }));
   };
+
+  describe('generateRoundRobinMatches', () => {
+    it('should generate correct matches for 4 participants (Even)', () => {
+      // 4 teams -> 3 rounds.
+      // Matches per round = 2.
+      // Total matches = 6.
+      const participants = createParticipants(4);
+      const matches = generateRoundRobinMatches('test-tournament', participants);
+
+      expect(matches).toHaveLength(6);
+      const rounds = new Set(matches.map((m) => m.round_number));
+      expect(rounds.size).toBe(3); // Rounds 1, 2, 3
+
+      // Check that everyone plays everyone exactly once
+      // P1 plays P2, P3, P4
+      const p1Matches = matches.filter(
+        (m) => m.participant_a_id === 'p-1' || m.participant_b_id === 'p-1',
+      );
+      expect(p1Matches).toHaveLength(3);
+      const opponents = p1Matches.map((m) =>
+        m.participant_a_id === 'p-1' ? m.participant_b_id : m.participant_a_id,
+      );
+      expect(opponents).toContain('p-2');
+      expect(opponents).toContain('p-3');
+      expect(opponents).toContain('p-4');
+    });
+
+    it('should generate correct matches for 5 participants (Odd)', () => {
+      // 5 teams -> Add BYE -> 6 slots.
+      // Rounds = 5.
+      // Matches per round = 3 (one is vs BYE, so 2 real matches).
+      // Total real matches = 5 rounds * 2 matches = 10.
+      const participants = createParticipants(5);
+      const matches = generateRoundRobinMatches('test-tournament', participants);
+
+      expect(matches).toHaveLength(10);
+      const rounds = new Set(matches.map((m) => m.round_number));
+      expect(rounds.size).toBe(5);
+
+      // Check P1 matches (should be 4, as one round is BYE)
+      const p1Matches = matches.filter(
+        (m) => m.participant_a_id === 'p-1' || m.participant_b_id === 'p-1',
+      );
+      expect(p1Matches).toHaveLength(4);
+    });
+
+    it('should generate double round robin matches', () => {
+      // 3 teams -> Add BYE -> 4 slots.
+      // Rounds = 3.
+      // Matches per round = 1 real match (others vs BYE).
+      // Single RR = 3 matches.
+      // Double RR = 6 matches.
+      const participants = createParticipants(3);
+      const matches = generateRoundRobinMatches('test-tournament', participants, {
+        doubleRoundRobin: true,
+      });
+
+      expect(matches).toHaveLength(6);
+      const rounds = new Set(matches.map((m) => m.round_number));
+      expect(rounds.size).toBe(6); // 3 rounds * 2 cycles
+    });
+  });
 
   describe('generateSingleEliminationMatches', () => {
     it('should generate correct bracket for 8 participants (power of 2)', () => {
